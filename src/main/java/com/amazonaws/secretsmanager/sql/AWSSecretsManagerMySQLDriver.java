@@ -1,0 +1,133 @@
+/*
+ * Copyright 2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"). You may not use this file except in compliance with
+ * the License. A copy of the License is located at
+ *
+ * http://aws.amazon.com/apache2.0
+ *
+ * or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+ * CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
+ * and limitations under the License.
+ */
+package com.amazonaws.secretsmanager.sql;
+
+import java.sql.SQLException;
+
+import com.amazonaws.secretsmanager.caching.SecretCache;
+import com.amazonaws.secretsmanager.caching.SecretCacheConfiguration;
+import com.amazonaws.services.secretsmanager.AWSSecretsManager;
+import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
+import com.amazonaws.util.StringUtils;
+
+/**
+ * <p>
+ * Provides support for accessing MySQL databases using credentials stored within AWS Secrets Manager.
+ * </p>
+ *
+ * <p>
+ * This will also work for MariaDB, as the error codes are the same.
+ * </p>
+ *
+ * <p>
+ * Configuration properties are specified using the "mysql" subprefix (e.g drivers.mysql.realDriverClass).
+ * </p>
+ */
+public final class AWSSecretsManagerMySQLDriver extends AWSSecretsManagerDriver {
+
+    /**
+     * The MySQL error code for when a user logs in using an invalid password.
+     *
+     * See <a href="https://dev.mysql.com/doc/refman/5.5/en/error-messages-server.html">MySQL error codes</a>.
+     */
+    public static final int ACCESS_DENIED_FOR_USER_USING_PASSWORD_TO_DATABASE = 1045;
+
+    /**
+     * Set to mysql.
+     */
+    public static final String SUBPREFIX = "mysql";
+
+    static {
+        AWSSecretsManagerDriver.register(new AWSSecretsManagerMySQLDriver());
+    }
+
+    /**
+     * Constructs the driver setting the properties from the properties file using system properties as defaults.
+     * Instantiates the secret cache with default options.
+     */
+    public AWSSecretsManagerMySQLDriver() {
+        super();
+    }
+
+    /**
+     * Constructs the driver setting the properties from the properties file using system properties as defaults.
+     * Uses the passed in SecretCache.
+     *
+     * @param cache                                             Secret cache to use to retrieve secrets
+     */
+    public AWSSecretsManagerMySQLDriver(SecretCache cache) {
+        super(cache);
+    }
+
+    /**
+     * Constructs the driver setting the properties from the properties file using system properties as defaults.
+     * Instantiates the secret cache with the passed in client builder.
+     *
+     * @param builder                                           Builder used to instantiate cache
+     */
+    public AWSSecretsManagerMySQLDriver(AWSSecretsManagerClientBuilder builder) {
+        super(builder);
+    }
+
+    /**
+     * Constructs the driver setting the properties from the properties file using system properties as defaults.
+     * Instantiates the secret cache with the provided AWS Secrets Manager client.
+     *
+     * @param client                                            AWS Secrets Manager client to instantiate cache
+     */
+    public AWSSecretsManagerMySQLDriver(AWSSecretsManager client) {
+        super(client);
+    }
+
+    /**
+     * Constructs the driver setting the properties from the properties file using system properties as defaults.
+     * Instantiates the secret cache with the provided cache configuration.
+     *
+     * @param cacheConfig                                       Cache configuration to instantiate cache
+     */
+    public AWSSecretsManagerMySQLDriver(SecretCacheConfiguration cacheConfig) {
+        super(cacheConfig);
+    }
+
+    @Override
+    public String getPropertySubprefix() {
+        return SUBPREFIX;
+    }
+
+    @Override
+    public boolean isExceptionDueToAuthenticationError(Exception e) {
+        if (e instanceof SQLException) {
+            SQLException sqle = (SQLException) e;
+            int errorCode = sqle.getErrorCode();
+            return errorCode == ACCESS_DENIED_FOR_USER_USING_PASSWORD_TO_DATABASE;
+        }
+        return false;
+    }
+
+    @Override
+    public String constructUrlFromEndpointPortDatabase(String endpoint, String port, String dbname) {
+        String url = "jdbc:mysql://" + endpoint;
+        if (!StringUtils.isNullOrEmpty(port)) {
+            url += ":" + port;
+        }
+        if (!StringUtils.isNullOrEmpty(dbname)) {
+            url += "/" + dbname;
+        }
+        return url;
+    }
+
+    @Override
+    public String getDefaultDriverClass() {
+        return "com.mysql.jdbc.Driver";
+    }
+}
