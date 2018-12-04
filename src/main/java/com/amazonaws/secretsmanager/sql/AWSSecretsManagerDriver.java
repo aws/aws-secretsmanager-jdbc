@@ -248,8 +248,11 @@ public abstract class AWSSecretsManagerDriver implements Driver {
         }
 
         if (url.startsWith(SCHEME)) {
-            // If this is a URL in our SCHEME, call the accpetsURL method of the wrapped driver
+            // If this is a URL in our SCHEME, call the acceptsURL method of the wrapped driver
             return getWrappedDriver().acceptsURL(unwrapUrl(url));
+        } else if (url.startsWith("jdbc:")) {
+            // For any other JDBC URL, return false
+            return false;
         } else  {
             // We accept a secret ID as the URL so if the config is set, and it's not a JDBC URL, return true
             return true;
@@ -342,8 +345,8 @@ public abstract class AWSSecretsManagerDriver implements Driver {
 
     @Override
     public Connection connect(String url, Properties info) throws SQLException {
-        if (url == null) {
-            throw new SQLException("url cannot be null.");
+        if (!acceptsURL(url)) {
+            return null;
         }
 
         String unwrappedUrl = "";
