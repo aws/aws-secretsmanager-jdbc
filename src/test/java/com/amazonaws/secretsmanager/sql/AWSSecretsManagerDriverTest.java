@@ -13,6 +13,7 @@
 package com.amazonaws.secretsmanager.sql;
 
 
+import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
@@ -181,6 +182,12 @@ public class AWSSecretsManagerDriverTest extends TestClass {
     }
 
     @Test
+    public void test_acceptsURL_returnsFalse_JdbcUrl() {
+        assertNotThrows(() -> assertFalse(sut.acceptsURL("jdbc:expectedUrl")));
+        assertEquals(0, DummyDriver.acceptsURLCallCount);
+    }
+
+    @Test
     public void test_acceptsURL_returnsTrue_secretId() {
         assertNotThrows(() -> assertTrue(sut.acceptsURL("someSecretId")));
         assertEquals(0, DummyDriver.acceptsURLCallCount);
@@ -214,6 +221,12 @@ public class AWSSecretsManagerDriverTest extends TestClass {
         props.setProperty("user", "user");
         assertNotThrows(() -> sut.connect("jdbc-secretsmanager:expectedUrl", props));
         assertEquals(1, DummyDriver.connectCallCount);
+    }
+
+    @Test
+    public void test_connect_jdbc_returnsNull() throws SQLException {
+        Connection conn = sut.connect("jdbc:expectedUrl", null);
+        assertEquals(conn, null);
     }
 
     @Test
