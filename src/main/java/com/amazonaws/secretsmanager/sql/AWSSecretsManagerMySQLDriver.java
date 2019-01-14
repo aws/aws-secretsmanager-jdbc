@@ -128,6 +128,6 @@ public final class AWSSecretsManagerMySQLDriver extends AWSSecretsManagerDriver 
 
     @Override
     public String getDefaultDriverClass() {
-        return "com.mysql.jdbc.Driver";
+        return "com.mysql.cj.jdbc.Driver";
     }
 }
