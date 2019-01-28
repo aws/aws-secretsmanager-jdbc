@@ -26,7 +26,7 @@ The recommended way to use the SQL Connection Library is to consume it from Mave
 </dependency>
 ```
 
-Don't forget to enable the download of snapshot jars from Maven.
+To use the latest build, don't forget to enable the download of snapshot jars from Maven.
 
 ``` xml
 <profiles>
