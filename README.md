@@ -16,7 +16,7 @@ This library is licensed under the Apache 2.0 License.
 After you've downloaded the code from GitHub, you can build it using Maven. To disable GPG signing in the build, use this command: `mvn clean install -Dgpg.skip=true`
 
 ## Usage
-The recommended way to use the SQL Connection Library is to consume it from Maven.
+The recommended way to use the SQL Connection Library is to consume it from Maven.  The latest released version can be found at: https://mvnrepository.com/artifact/com.amazonaws.secretsmanager/aws-secretsmanager-jdbc
 
 ``` xml
 <dependency>
@@ -26,7 +26,7 @@ The recommended way to use the SQL Connection Library is to consume it from Mave
 </dependency>
 ```
 
-To use the latest build, don't forget to enable the download of snapshot jars from Maven.
+To use the latest build (pre-release), don't forget to enable the download of snapshot jars from Maven.
 
 ``` xml
 <profiles>
