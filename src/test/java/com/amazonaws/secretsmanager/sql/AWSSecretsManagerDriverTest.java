@@ -43,6 +43,7 @@ import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
  */
 @RunWith(PowerMockRunner.class)
 @SuppressStaticInitializationFor({"com.amazonaws.secretsmanager.sql.AWSSecretsManagerMSSQLServerDriver",
+    "com.amazonaws.secretsmanager.sql.AWSSecretsManagerMariaDBDriver",
     "com.amazonaws.secretsmanager.sql.AWSSecretsManagerMySQLDriver",
     "com.amazonaws.secretsmanager.sql.AWSSecretsManagerOracleDriver",
     "com.amazonaws.secretsmanager.sql.AWSSecretsManagerPostgreSQLDriver"})
