@@ -99,6 +99,11 @@ public abstract class AWSSecretsManagerDriver implements Driver {
      */
     public static final String PROPERTY_PREFIX = "drivers";
 
+    /**
+     * Message to return on the RuntimeException when secret string is invalid json
+     */ 
+    public static final String INVALID_SECRET_STRING_JSON = "Could not parse SecretString JSON";
+
     private SecretCache secretCache;
 
     private String realDriverClass;
@@ -321,7 +326,7 @@ public abstract class AWSSecretsManagerDriver implements Driver {
                 updatedInfo.setProperty("password", jsonObject.get("password").asText());
             } catch (IOException e) {
                 // Most likely to occur in the event that the data is not JSON. This is more of a user error.
-                throw new RuntimeException(e);
+                throw new RuntimeException(INVALID_SECRET_STRING_JSON);
             }
 
             try {
@@ -369,7 +374,7 @@ public abstract class AWSSecretsManagerDriver implements Driver {
                 unwrappedUrl = constructUrlFromEndpointPortDatabase(endpoint, port, dbname);
             } catch (IOException e) {
                 // Most likely to occur in the event that the data is not JSON. This is more of a user error.
-                throw new RuntimeException(e);
+                throw new RuntimeException(INVALID_SECRET_STRING_JSON);
             }
         }
 
