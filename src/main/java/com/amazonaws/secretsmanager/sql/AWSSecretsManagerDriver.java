@@ -354,9 +354,21 @@ public abstract class AWSSecretsManagerDriver implements Driver {
             return null;
         }
 
-        String unwrappedUrl = "";
         if (url.startsWith(SCHEME)) { // If this is a URL in the correct scheme, unwrap it
-            unwrappedUrl = unwrapUrl(url);
+            String unwrappedUrl = unwrapUrl(url);
+
+            if (info != null && info.getProperty("user") != null) {
+                String credentialsSecretId = info.getProperty("user");
+                try {
+                    return connectWithSecret(unwrappedUrl, info, credentialsSecretId);
+                } catch (InterruptedException e) {
+                    // User driven exception. Throw a runtime exception.
+                    throw new RuntimeException(e);
+                }
+            } else {
+                return getWrappedDriver().connect(unwrappedUrl, info);
+            }
+
         } else { // Else, assume this is a secret ID and try to retrieve it
             String secretString = secretCache.getSecretString(url);
             if (StringUtils.isNullOrEmpty(secretString)) {
@@ -364,6 +376,7 @@ public abstract class AWSSecretsManagerDriver implements Driver {
                         SCHEME + " or a valid retrievable secret ID ");
             }
 
+            String unwrappedUrl = "";
             try {
                 JsonNode jsonObject = mapper.readTree(secretString);
                 String endpoint = jsonObject.get("host").asText();
@@ -376,18 +389,14 @@ public abstract class AWSSecretsManagerDriver implements Driver {
                 // Most likely to occur in the event that the data is not JSON. This is more of a user error.
                 throw new RuntimeException(INVALID_SECRET_STRING_JSON);
             }
-        }
 
-        if (info != null && info.getProperty("user") != null) {
-            String credentialsSecretId = info.getProperty("user");
             try {
-                return connectWithSecret(unwrappedUrl, info, credentialsSecretId);
+                return connectWithSecret(unwrappedUrl, info, url);
             } catch (InterruptedException e) {
                 // User driven exception. Throw a runtime exception.
                 throw new RuntimeException(e);
             }
-        } else {
-            return getWrappedDriver().connect(unwrappedUrl, info);
+
         }
     }
 
