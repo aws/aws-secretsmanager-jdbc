@@ -115,9 +115,12 @@ public abstract class AWSSecretsManagerDriver implements Driver {
     /**
      * Constructs the driver setting the properties from the properties file using system properties as defaults.
      * Instantiates the secret cache with default options.
+     * AWS_SECRET_JDBC_REGION environment variable can be provided to override the region in the secret cache.
      */
     protected AWSSecretsManagerDriver() {
-        this(new SecretCache());
+        this(System.getenv("AWS_SECRET_JDBC_REGION") == null ? new SecretCache() :
+             new SecretCache(AWSSecretsManagerClientBuilder.standard().
+                 withRegion(System.getenv("AWS_SECRET_JDBC_REGION"))));
     }
 
     /**
