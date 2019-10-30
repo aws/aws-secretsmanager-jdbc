@@ -18,7 +18,7 @@
   <artifactId>aws-secretsmanager-jdbc</artifactId>
   <packaging>jar</packaging>
   <name>AWS Secrets Manager SQL Connection Library</name>
-  <version>1.0.2</version>
+  <version>1.0.3</version>
   <description>The AWS Secrets Manager SQL Connection Library for Java enables Java developers to easily
     connect to SQL databases using secrets stored in AWS Secrets Manager.
   </description>
@@ -65,11 +65,11 @@
   <distributionManagement>
     <snapshotRepository>
       <id>ossrh</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      <url>https://aws.oss.sonatype.org/content/repositories/snapshots</url>
     </snapshotRepository>
     <repository>
       <id>ossrh</id>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+      <url>https://aws.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
   </distributionManagement>
 
@@ -236,7 +236,7 @@
             <extensions>true</extensions>
             <configuration>
               <serverId>sonatype-nexus-staging</serverId>
-              <nexusUrl>https://oss.sonatype.org</nexusUrl>
+              <nexusUrl>https://aws.oss.sonatype.org</nexusUrl>
               <autoReleaseAfterClose>true</autoReleaseAfterClose>
             </configuration>
           </plugin>
