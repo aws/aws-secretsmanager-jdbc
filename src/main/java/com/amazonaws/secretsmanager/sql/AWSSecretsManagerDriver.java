@@ -177,6 +177,20 @@ public abstract class AWSSecretsManagerDriver implements Driver {
     }
 
     /**
+     * Loads the real driver.
+     *
+     * @throws IllegalStateException                            When there is no class with the name
+     *                                                          <code>realDriverClass</code>
+     */
+    private void loadRealDriver() {
+        try {
+            Class.forName(this.realDriverClass);
+        } catch (ClassNotFoundException e) {
+            throw new IllegalStateException("Could not load real driver with name, \"" + this.realDriverClass + "\".", e);
+        }
+    }
+
+    /**
      * Called when the driver is deregistered to cleanup resources.
      */
     private static void shutdown(AWSSecretsManagerDriver driver) {
@@ -234,6 +248,7 @@ public abstract class AWSSecretsManagerDriver implements Driver {
      *                                                          <code>realDriverClass</code>
      */
     public Driver getWrappedDriver() {
+        loadRealDriver();
         Enumeration<Driver> availableDrivers = DriverManager.getDrivers();
         while (availableDrivers.hasMoreElements()) {
             Driver driver = availableDrivers.nextElement();
