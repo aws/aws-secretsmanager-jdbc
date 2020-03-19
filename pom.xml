@@ -28,7 +28,7 @@
     <aws-java-sdk.version>1.11.418</aws-java-sdk.version>
     <aws-secretsmanager-cache.version>1.0.1</aws-secretsmanager-cache.version>
     <lombok.version>1.16.20</lombok.version>
-    <jackson.version>2.9.10.1</jackson.version>
+    <jackson.version>2.9.10.3</jackson.version>
     <junit.version>4.11</junit.version>
     <mockito.version>1.10.19</mockito.version>
     <powermock.version>1.6.6</powermock.version>
