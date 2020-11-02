@@ -14,8 +14,8 @@ package com.amazonaws.secretsmanager.sql;
 
 import com.amazonaws.secretsmanager.caching.SecretCache;
 import com.amazonaws.secretsmanager.caching.SecretCacheConfiguration;
-import com.amazonaws.services.secretsmanager.AWSSecretsManager;
-import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClientBuilder;
 
 /**
  * Dummy database driver wrapper.
@@ -46,7 +46,7 @@ public class AWSSecretsManagerDummyDriver extends AWSSecretsManagerDriver {
      *
      * @param builder                                           Builder used to instantiate cache
      */
-    public AWSSecretsManagerDummyDriver(AWSSecretsManagerClientBuilder builder) {
+    public AWSSecretsManagerDummyDriver(SecretsManagerClientBuilder builder) {
         super(builder);
     }
 
@@ -56,7 +56,7 @@ public class AWSSecretsManagerDummyDriver extends AWSSecretsManagerDriver {
      *
      * @param client                                            AWS Secrets Manager client to instantiate cache
      */
-    public AWSSecretsManagerDummyDriver(AWSSecretsManager client) {
+    public AWSSecretsManagerDummyDriver(SecretsManagerClient client) {
         super(client);
     }
 
