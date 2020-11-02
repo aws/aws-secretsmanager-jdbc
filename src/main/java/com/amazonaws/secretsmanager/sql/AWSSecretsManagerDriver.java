@@ -12,17 +12,18 @@
  */
 package com.amazonaws.secretsmanager.sql;
 
-import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.secretsmanager.util.Config;
 import com.amazonaws.secretsmanager.caching.SecretCache;
 import com.amazonaws.secretsmanager.caching.SecretCacheConfiguration;
-import com.amazonaws.services.secretsmanager.AWSSecretsManager;
-import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
-import com.amazonaws.util.StringUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClientBuilder;
+import software.amazon.awssdk.utils.StringUtils;
 
 import java.io.IOException;
+import java.net.URI;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -144,8 +145,9 @@ public abstract class AWSSecretsManagerDriver implements Driver {
         if (vpcEndpointUrl == null || vpcEndpointUrl.isEmpty() || vpcEndpointRegion == null || vpcEndpointRegion.isEmpty()) {
             this.secretCache = cache;
         } else {
-            AWSSecretsManagerClientBuilder builder = AWSSecretsManagerClientBuilder.standard();
-            builder.setEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(vpcEndpointUrl, vpcEndpointRegion));
+            SecretsManagerClientBuilder builder = SecretsManagerClient.builder();
+            builder.endpointOverride(URI.create(vpcEndpointUrl));
+            builder.region(Region.of(vpcEndpointRegion));
 
             this.secretCache = new SecretCache(builder);
         }
@@ -160,7 +162,7 @@ public abstract class AWSSecretsManagerDriver implements Driver {
      *
      * @param builder                                           Builder used to instantiate cache
      */
-    protected AWSSecretsManagerDriver(AWSSecretsManagerClientBuilder builder) {
+    protected AWSSecretsManagerDriver(SecretsManagerClientBuilder builder) {
         this(new SecretCache(builder));
     }
 
@@ -170,7 +172,7 @@ public abstract class AWSSecretsManagerDriver implements Driver {
      *
      * @param client                                            AWS Secrets Manager client to instantiate cache
      */
-    protected AWSSecretsManagerDriver(AWSSecretsManager client) {
+    protected AWSSecretsManagerDriver(SecretsManagerClient client) {
         this(new SecretCache(client));
     }
 
@@ -187,7 +189,6 @@ public abstract class AWSSecretsManagerDriver implements Driver {
     /**
      * Sets general configuration properties that are unrelated to the API client.
      *
-     * @param config                                            The main configuration for this driver.
      */
     private void setProperties() {
         this.config = Config.loadMainConfig().getSubconfig(PROPERTY_PREFIX + "." + getPropertySubprefix());
@@ -381,7 +382,7 @@ public abstract class AWSSecretsManagerDriver implements Driver {
             unwrappedUrl = unwrapUrl(url);
         } else { // Else, assume this is a secret ID and try to retrieve it
             String secretString = secretCache.getSecretString(url);
-            if (StringUtils.isNullOrEmpty(secretString)) {
+            if (secretString == null || StringUtils.isEmpty(secretString)) {
                 throw new IllegalArgumentException("URL " + url + " is not a valid URL starting with scheme " +
                         SCHEME + " or a valid retrievable secret ID ");
             }

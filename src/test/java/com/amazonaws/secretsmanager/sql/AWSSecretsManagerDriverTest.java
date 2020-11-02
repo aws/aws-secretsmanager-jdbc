@@ -34,8 +34,8 @@ import org.junit.Before;
 import com.amazonaws.secretsmanager.caching.SecretCache;
 import com.amazonaws.secretsmanager.caching.SecretCacheConfiguration;
 import com.amazonaws.secretsmanager.util.TestClass;
-import com.amazonaws.services.secretsmanager.AWSSecretsManager;
-import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClientBuilder;
 
 /**
  * Tests for AWSSecretsManagerDriver. Uses a config file in the resources folder just to make sure it can read from
@@ -129,13 +129,13 @@ public class AWSSecretsManagerDriverTest extends TestClass {
     @Test
     public void test_init_constructor_null_params() {
         try {
-            new AWSSecretsManagerDummyDriver((AWSSecretsManagerClientBuilder)null);
+            new AWSSecretsManagerDummyDriver((SecretsManagerClientBuilder)null);
         } catch (Exception e) {}
         try {
             new AWSSecretsManagerDummyDriver((SecretCacheConfiguration)null);
         } catch (Exception e) {}
         try {
-            new AWSSecretsManagerDummyDriver((AWSSecretsManager)null);
+            new AWSSecretsManagerDummyDriver((SecretsManagerClient) null);
         } catch (Exception e) {}
     }
 

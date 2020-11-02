@@ -16,9 +16,9 @@ import java.sql.SQLException;
 
 import com.amazonaws.secretsmanager.caching.SecretCache;
 import com.amazonaws.secretsmanager.caching.SecretCacheConfiguration;
-import com.amazonaws.services.secretsmanager.AWSSecretsManager;
-import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
-import com.amazonaws.util.StringUtils;
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClientBuilder;
+import software.amazon.awssdk.utils.StringUtils;
 
 /**
  * <p>
@@ -71,7 +71,7 @@ public final class AWSSecretsManagerPostgreSQLDriver extends AWSSecretsManagerDr
      *
      * @param builder                                           Builder used to instantiate cache
      */
-    public AWSSecretsManagerPostgreSQLDriver(AWSSecretsManagerClientBuilder builder) {
+    public AWSSecretsManagerPostgreSQLDriver(SecretsManagerClientBuilder builder) {
         super(builder);
     }
 
@@ -81,7 +81,7 @@ public final class AWSSecretsManagerPostgreSQLDriver extends AWSSecretsManagerDr
      *
      * @param client                                            AWS Secrets Manager client to instantiate cache
      */
-    public AWSSecretsManagerPostgreSQLDriver(AWSSecretsManager client) {
+    public AWSSecretsManagerPostgreSQLDriver(SecretsManagerClient client) {
         super(client);
     }
 
@@ -113,10 +113,10 @@ public final class AWSSecretsManagerPostgreSQLDriver extends AWSSecretsManagerDr
     @Override
     public String constructUrlFromEndpointPortDatabase(String endpoint, String port, String dbname) {
         String url = "jdbc:postgresql://" + endpoint;
-        if (!StringUtils.isNullOrEmpty(port)) {
+        if (!StringUtils.isEmpty(port)) {
             url += ":" + port;
         }
-        if (!StringUtils.isNullOrEmpty(dbname)) {
+        if (!StringUtils.isEmpty(dbname)) {
             url += "/" + dbname;
         }
         return url;

@@ -12,7 +12,7 @@
  */
 package com.amazonaws.secretsmanager.util;
 
-import com.amazonaws.services.secretsmanager.model.GetSecretValueRequest;
+import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -116,7 +116,7 @@ public class TestClass {
     }
 
     public GetSecretValueRequest requestWithName(String secretName) {
-        return new GetSecretValueRequest().withSecretId(secretName);
+        return  GetSecretValueRequest.builder().secretId(secretName).build();
     }
 
     public Object callMethodWithArguments(Object object, String methodName, Object... args) {
