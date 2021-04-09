@@ -70,7 +70,6 @@ public final class Config {
         try (InputStream configFile = ClassLoader.getSystemResourceAsStream(resourceName)) {
             if (configFile != null) {
                 newConfig.load(configFile);
-                configFile.close();
             }
         } catch (IOException e) {
             throw new PropertyException("An error occured when loading the property file, " + CONFIG_FILE_NAME, e);
