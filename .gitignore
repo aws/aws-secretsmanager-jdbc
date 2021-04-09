@@ -1,0 +1,14 @@
+# Maven Build files
+/target/
+
+# InteliJ IDEA files
+.DS_Store
+.idea
+
+# Eclipse IDE files
+.project
+.classpath
+.settings
+
+# Checkstyle local config file
+.checkstyle
