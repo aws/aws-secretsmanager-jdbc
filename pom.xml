@@ -14,11 +14,11 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.amazonaws.secretsmanager</groupId>
+  <groupId>io.github.kuraun</groupId>
   <artifactId>aws-secretsmanager-jdbc</artifactId>
   <packaging>jar</packaging>
   <name>AWS Secrets Manager SQL Connection Library</name>
-  <version>1.0.6</version>
+  <version>1.0.7</version>
   <description>The AWS Secrets Manager SQL Connection Library for Java enables Java developers to easily
     connect to SQL databases using secrets stored in AWS Secrets Manager.
   </description>
@@ -48,17 +48,14 @@
   </licenses>
 
   <scm>
-    <url>https://github.com/aws/aws-secretsmanager-jdbc.git</url>
+    <url>https://github.com/kuraun/aws-secretsmanager-jdbc.git</url>
   </scm>
 
   <developers>
     <developer>
-      <id>amazonwebservices</id>
-      <organization>Amazon Web Services</organization>
-      <organizationUrl>https://aws.amazon.com</organizationUrl>
-      <roles>
-        <role>developer</role>
-      </roles>
+      <id>kuraun.dev</id>
+      <name>kuraun.dev</name>
+      <email>kuraun.dev@gmail.com</email>
     </developer>
   </developers>
 
