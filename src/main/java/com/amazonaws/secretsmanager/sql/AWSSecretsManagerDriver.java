@@ -118,6 +118,11 @@ public abstract class AWSSecretsManagerDriver implements Driver {
      */
     public static final String PROPERTY_CACHE_ITEM_TTL = "secretsmanagerCacheItemTTL";
 
+    /**
+     * The environment variable name of cache item TTL
+     */
+    public static final String DRIVERS_SECRETSMANAGER_CACHE_ITEM_TTL = "DRIVERS_SECRETSMANAGER_CACHE_ITEM_TTL";
+
     private SecretCache secretCache;
 
     private String realDriverClass;
@@ -134,7 +139,7 @@ public abstract class AWSSecretsManagerDriver implements Driver {
         final Config config = Config.loadMainConfig();
         String vpcEndpointUrl = config.getStringPropertyWithDefault(PROPERTY_PREFIX+"."+PROPERTY_VPC_ENDPOINT_URL, null);
         String vpcEndpointRegion = config.getStringPropertyWithDefault(PROPERTY_PREFIX+"."+PROPERTY_VPC_ENDPOINT_REGION, null);
-        long cacheItemTTL = config.getLongPropertyWithDefault(PROPERTY_PREFIX+"."+PROPERTY_CACHE_ITEM_TTL, TimeUnit.HOURS.toMillis(1));
+        long cacheItemTTL = getCacheItemTTL();
 
         if (vpcEndpointUrl == null || vpcEndpointUrl.isEmpty() || vpcEndpointRegion == null || vpcEndpointRegion.isEmpty()) {
             setSecretCache(cacheItemTTL, null);
@@ -194,8 +199,6 @@ public abstract class AWSSecretsManagerDriver implements Driver {
 
     /**
      * Sets general configuration properties that are unrelated to the API client.
-     *
-     * @param config                                            The main configuration for this driver.
      */
     private void setProperties() {
         this.config = Config.loadMainConfig().getSubconfig(PROPERTY_PREFIX + "." + getPropertySubprefix());
@@ -219,6 +222,15 @@ public abstract class AWSSecretsManagerDriver implements Driver {
             secretCacheConfiguration.setClient(client);
         }
         this.secretCache = new SecretCache(secretCacheConfiguration);
+    }
+
+    private long getCacheItemTTL() {
+        String envCacheItemTTL = System.getenv(DRIVERS_SECRETSMANAGER_CACHE_ITEM_TTL);
+        if (envCacheItemTTL != null) {
+            return Long.parseLong(envCacheItemTTL);
+        }
+        return config.getLongPropertyWithDefault(
+                PROPERTY_PREFIX+"."+PROPERTY_CACHE_ITEM_TTL, TimeUnit.HOURS.toMillis(1L));
     }
 
     /**
