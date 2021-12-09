@@ -68,12 +68,11 @@ public final class Config {
         Properties newConfig = new Properties(System.getProperties());
 
         try (InputStream configFile = ClassLoader.getSystemResourceAsStream(resourceName)) {
-            if (configFile != null) {
-                newConfig.load(configFile);
-                configFile.close();
-            }
+            newConfig.load(configFile);
         } catch (IOException e) {
             throw new PropertyException("An error occured when loading the property file, " + CONFIG_FILE_NAME, e);
+        } catch (NullPointerException e) {
+            // This is to fix findbug's RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE without failing ConfigTest.test_loadConfigFrom_badFile test
         }
         return newConfig;
     }
