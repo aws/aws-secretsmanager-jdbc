@@ -37,7 +37,8 @@
     <javadoc.plugin.version>3.0.1</javadoc.plugin.version>
     <source.plugin.version>3.0.1</source.plugin.version>
     <checkstyle.plugin.version>2.17</checkstyle.plugin.version>
-    <findbugs.plugin.version>3.0.5</findbugs.plugin.version>
+    <spotbugs.plugin.version>4.5.0.0</spotbugs.plugin.version>
+    <spotbugs.version>4.5.1</spotbugs.version>
   </properties>
 
   <licenses>
@@ -196,7 +197,7 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
+      <!-- <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>findbugs-maven-plugin</artifactId>
         <version>${findbugs.plugin.version}</version>
@@ -214,6 +215,33 @@
             </goals>
           </execution>
         </executions>
+      </plugin> -->
+      <plugin>
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-maven-plugin</artifactId>
+        <version>${spotbugs.plugin.version}</version>
+        <configuration>
+          <effort>Max</effort>
+          <threshold>Low</threshold>
+          <xmlOutput>true</xmlOutput>
+        </configuration>
+        <executions>
+          <execution>
+            <id>analyze-compile</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
+        <dependencies>
+          <!-- overwrite dependency on spotbugs if you want to specify the version of spotbugs -->
+          <dependency>
+            <groupId>com.github.spotbugs</groupId>
+            <artifactId>spotbugs</artifactId>
+            <version>${spotbugs.version}</version>
+          </dependency>
+        </dependencies>
       </plugin>
     </plugins>
   </build>
