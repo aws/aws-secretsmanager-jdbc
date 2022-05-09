@@ -67,8 +67,11 @@ public final class Config {
     private static Properties loadPropertiesFromConfigFile(String resourceName) {
         Properties newConfig = new Properties(System.getProperties());
 
-        try (InputStream configFile = ClassLoader.getSystemResourceAsStream(resourceName)) {
-            if (configFile != null) {
+        InputStream configFile;
+
+        try {
+            configFile = ClassLoader.getSystemResourceAsStream(resourceName);
+            if(configFile != null) {
                 newConfig.load(configFile);
                 configFile.close();
             }
