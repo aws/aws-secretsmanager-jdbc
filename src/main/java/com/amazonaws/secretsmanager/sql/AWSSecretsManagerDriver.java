@@ -12,6 +12,7 @@
  */
 package com.amazonaws.secretsmanager.sql;
 
+import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.secretsmanager.util.Config;
 import com.amazonaws.secretsmanager.caching.SecretCache;
 import com.amazonaws.secretsmanager.caching.SecretCacheConfiguration;
@@ -104,6 +105,13 @@ public abstract class AWSSecretsManagerDriver implements Driver {
      */ 
     public static final String INVALID_SECRET_STRING_JSON = "Could not parse SecretString JSON";
 
+    /**
+     * Configuration property to override PrivateLink DNS URL for Secrets Manager
+     */
+    private static final String PROPERTY_VPC_ENDPOINT_URL = "vpcEndpointUrl";
+
+    private static final String PROPERTY_VPC_ENDPOINT_REGION = "vpcEndpointRegion";
+
     private SecretCache secretCache;
 
     private String realDriverClass;
@@ -130,8 +138,22 @@ public abstract class AWSSecretsManagerDriver implements Driver {
      * @param cache                                             Secret cache to use to retrieve secrets
      */
     protected AWSSecretsManagerDriver(SecretCache cache) {
+
+        final Config config = Config.loadMainConfig();
+
+        String vpcEndpointUrl = config.getStringPropertyWithDefault(PROPERTY_PREFIX+"."+PROPERTY_VPC_ENDPOINT_URL, null);
+        String vpcEndpointRegion = config.getStringPropertyWithDefault(PROPERTY_PREFIX+"."+PROPERTY_VPC_ENDPOINT_REGION, null);
+
+        if (vpcEndpointUrl == null || vpcEndpointUrl.isEmpty() || vpcEndpointRegion == null || vpcEndpointRegion.isEmpty()) {
+            this.secretCache = cache;
+        } else {
+            AWSSecretsManagerClientBuilder builder = AWSSecretsManagerClientBuilder.standard();
+            builder.setEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(vpcEndpointUrl, vpcEndpointRegion));
+
+            this.secretCache = new SecretCache(builder);
+        }
+
         setProperties();
-        this.secretCache = cache;
         AWSSecretsManagerDriver.register(this);
     }
 
