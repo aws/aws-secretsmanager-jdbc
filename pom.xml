@@ -29,7 +29,7 @@
     <jackson.version>2.13.2.2</jackson.version>
     <junit.version>4.13.1</junit.version>
     <mockito.version>1.10.19</mockito.version>
-    <powermock.version>1.6.6</powermock.version>
+    <powermock.version>1.7.4</powermock.version>
     <compiler.plugin.version>3.2</compiler.plugin.version>
     <javadoc.plugin.version>3.0.1</javadoc.plugin.version>
     <source.plugin.version>3.0.1</source.plugin.version>
