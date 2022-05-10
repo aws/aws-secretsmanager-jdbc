@@ -27,6 +27,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.junit.Before;
@@ -42,11 +43,8 @@ import software.amazon.awssdk.services.secretsmanager.SecretsManagerClientBuilde
  * the file.
  */
 @RunWith(PowerMockRunner.class)
-@SuppressStaticInitializationFor({"com.amazonaws.secretsmanager.sql.AWSSecretsManagerMSSQLServerDriver",
-    "com.amazonaws.secretsmanager.sql.AWSSecretsManagerMariaDBDriver",
-    "com.amazonaws.secretsmanager.sql.AWSSecretsManagerMySQLDriver",
-    "com.amazonaws.secretsmanager.sql.AWSSecretsManagerOracleDriver",
-    "com.amazonaws.secretsmanager.sql.AWSSecretsManagerPostgreSQLDriver"})
+@SuppressStaticInitializationFor({"com.amazonaws.secretsmanager.sql.*"})
+@PowerMockIgnore("jdk.internal.reflect.*")
 public class AWSSecretsManagerDriverTest extends TestClass {
 
     private AWSSecretsManagerDummyDriver sut;
