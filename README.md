@@ -1,5 +1,7 @@
 # AWS Secrets Manager JDBC Library
 
+![build](https://github.com/aws/aws-secretsmanager-jdbc/actions/workflows/CI.yml/badge.svg)
+
 The **AWS Secrets Manager JDBC Library** enables Java developers to easily connect to SQL databases using secrets stored in AWS Secrets Manager.
 
 ## License
@@ -22,7 +24,7 @@ The recommended way to use the SQL Connection Library is to consume it from Mave
 <dependency>
     <groupId>com.amazonaws.secretsmanager</groupId>
     <artifactId>aws-secretsmanager-jdbc</artifactId>
-    <version>1.0.5</version>
+    <version>1.0.8</version>
 </dependency>
 ```
 
