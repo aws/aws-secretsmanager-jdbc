@@ -29,24 +29,24 @@ import com.amazonaws.secretsmanager.caching.SecretCache;
 import com.amazonaws.secretsmanager.util.TestClass;
 
 /**
- * Tests for the Oracle Driver.
+ * Tests for the Redshift Driver.
  */
 @RunWith(PowerMockRunner.class)
-@SuppressStaticInitializationFor("com.amazonaws.secretsmanager.sql.AWSSecretsManagerOracleDriver")
+@SuppressStaticInitializationFor("com.amazonaws.secretsmanager.sql.AWSSecretsManagerRedshiftDriver")
 @PowerMockIgnore("jdk.internal.reflect.*")
-public class AWSSecretsManagerOracleDriverTest extends TestClass {
+public class AWSSecretsManagerRedshiftDriverTest extends TestClass {
 
-    private AWSSecretsManagerOracleDriver sut;
+    private AWSSecretsManagerRedshiftDriver sut;
 
     @Mock
     private SecretCache cache;
 
     @Before
     public void setup() {
-        System.setProperty("drivers.oracle.realDriverClass", "com.amazonaws.secretsmanager.sql.DummyDriver");
+        System.setProperty("drivers.redshift.realDriverClass", "com.amazonaws.secretsmanager.sql.DummyDriver");
         MockitoAnnotations.initMocks(this);
         try {
-            sut = new AWSSecretsManagerOracleDriver(cache);
+            sut = new AWSSecretsManagerRedshiftDriver(cache);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -54,24 +54,19 @@ public class AWSSecretsManagerOracleDriverTest extends TestClass {
 
     @Test
     public void test_getPropertySubprefix() {
-        assertEquals("oracle", sut.getPropertySubprefix());
+        assertEquals("redshift", sut.getPropertySubprefix());
     }
 
     @Test
-    public void test_isExceptionDueToAuthenticationError_returnsTrue_correctExceptions() {
-        SQLException e = new SQLException("", "", 17079);
-        assertTrue(sut.isExceptionDueToAuthenticationError(e));
+    public void test_isExceptionDueToAuthenticationError_returnsTrue_correctException() {
+        SQLException e = new SQLException("", "28P01");
 
-        e = new SQLException("", "", 1017);
-        assertTrue(sut.isExceptionDueToAuthenticationError(e));
-
-        e = new SQLException("", "", 9911);
         assertTrue(sut.isExceptionDueToAuthenticationError(e));
     }
 
     @Test
     public void test_isExceptionDueToAuthenticationError_returnsFalse_wrongSQLException() {
-        SQLException e = new SQLException("", "", 1046);
+        SQLException e = new SQLException("", "28P02");
 
         assertFalse(sut.isExceptionDueToAuthenticationError(e));
     }
@@ -86,26 +81,25 @@ public class AWSSecretsManagerOracleDriverTest extends TestClass {
     @Test
     public void test_constructUrl() {
         String url = sut.constructUrlFromEndpointPortDatabase("test-endpoint", "1234", "dev");
-        assertEquals(url, "jdbc:oracle:thin:@//test-endpoint:1234/dev");
+        assertEquals(url, "jdbc:redshift://test-endpoint:1234/dev");
     }
 
     @Test
     public void test_constructUrlNullPort() {
         String url = sut.constructUrlFromEndpointPortDatabase("test-endpoint", null, "dev");
-        assertEquals(url, "jdbc:oracle:thin:@//test-endpoint/dev");
+        assertEquals(url, "jdbc:redshift://test-endpoint/dev");
     }
 
     @Test
     public void test_constructUrlNullDatabase() {
         String url = sut.constructUrlFromEndpointPortDatabase("test-endpoint", "1234", null);
-        assertEquals(url, "jdbc:oracle:thin:@//test-endpoint:1234");
+        assertEquals(url, "jdbc:redshift://test-endpoint:1234");
     }
 
     @Test
     public void test_getDefaultDriverClass() {
-        System.clearProperty("drivers.oracle.realDriverClass");
-        AWSSecretsManagerOracleDriver sut2 = new AWSSecretsManagerOracleDriver(cache);
+        System.clearProperty("drivers.redshift.realDriverClass");
+        AWSSecretsManagerRedshiftDriver sut2 = new AWSSecretsManagerRedshiftDriver(cache);
         assertEquals(getFieldFrom(sut2, "realDriverClass"), sut2.getDefaultDriverClass());
     }
 }
-
