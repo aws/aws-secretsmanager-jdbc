@@ -10,33 +10,32 @@
  ~  CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
  ~  and limitations under the License.
  -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.amazonaws.secretsmanager</groupId>
   <artifactId>aws-secretsmanager-jdbc</artifactId>
   <packaging>jar</packaging>
   <name>AWS Secrets Manager SQL Connection Library</name>
-  <version>1.0.2</version>
+  <version>1.0.8</version>
   <description>The AWS Secrets Manager SQL Connection Library for Java enables Java developers to easily
     connect to SQL databases using secrets stored in AWS Secrets Manager.
   </description>
   <url>https://aws.amazon.com/secrets-manager</url>
 
   <properties>
-    <aws-java-sdk.version>1.11.418</aws-java-sdk.version>
-    <aws-secretsmanager-cache.version>1.0.0</aws-secretsmanager-cache.version>
-    <lombok.version>1.16.20</lombok.version>
-    <jackson.version>2.8.11.1</jackson.version>
-    <junit.version>4.11</junit.version>
+    <aws-java-sdk.version>1.12.148</aws-java-sdk.version>
+    <aws-secretsmanager-cache.version>1.0.2</aws-secretsmanager-cache.version>
+    <lombok.version>1.18.24</lombok.version>
+    <jackson.version>2.13.2.2</jackson.version>
+    <junit.version>4.13.1</junit.version>
     <mockito.version>1.10.19</mockito.version>
     <powermock.version>1.6.6</powermock.version>
     <compiler.plugin.version>3.2</compiler.plugin.version>
     <javadoc.plugin.version>3.0.1</javadoc.plugin.version>
     <source.plugin.version>3.0.1</source.plugin.version>
     <checkstyle.plugin.version>2.17</checkstyle.plugin.version>
-    <findbugs.plugin.version>3.0.4</findbugs.plugin.version>
+    <findbugs.plugin.version>3.0.5</findbugs.plugin.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
   <licenses>
@@ -65,11 +64,11 @@
   <distributionManagement>
     <snapshotRepository>
       <id>ossrh</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      <url>https://aws.oss.sonatype.org/content/repositories/snapshots</url>
     </snapshotRepository>
     <repository>
       <id>ossrh</id>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+      <url>https://aws.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
   </distributionManagement>
 
@@ -242,7 +241,7 @@
             <extensions>true</extensions>
             <configuration>
               <serverId>sonatype-nexus-staging</serverId>
-              <nexusUrl>https://oss.sonatype.org</nexusUrl>
+              <nexusUrl>https://aws.oss.sonatype.org</nexusUrl>
               <autoReleaseAfterClose>true</autoReleaseAfterClose>
             </configuration>
           </plugin>
