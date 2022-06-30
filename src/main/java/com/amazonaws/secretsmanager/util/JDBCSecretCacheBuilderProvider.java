@@ -30,7 +30,7 @@ public class JDBCSecretCacheBuilderProvider {
     static final String REGION_ENVIRONMENT_VARIABLE = "AWS_SECRET_JDBC_REGION";
 
 
-    private static Config Config;
+    private Config configFile;
 
 
     public JDBCSecretCacheBuilderProvider() {
@@ -38,7 +38,7 @@ public class JDBCSecretCacheBuilderProvider {
     }
 
     public JDBCSecretCacheBuilderProvider(Config config) {
-        Config = config;
+        configFile = config;
     }
 
     /**
@@ -56,10 +56,10 @@ public class JDBCSecretCacheBuilderProvider {
         AWSSecretsManagerClientBuilder builder = AWSSecretsManagerClientBuilder.standard();
 
         //Retrieve data from information sources.
-        String vpcEndpointUrl = Config.getStringPropertyWithDefault(AWSSecretsManagerDriver.PROPERTY_PREFIX+"."+PROPERTY_VPC_ENDPOINT_URL, null);
-        String vpcEndpointRegion = Config.getStringPropertyWithDefault(AWSSecretsManagerDriver.PROPERTY_PREFIX+"."+PROPERTY_VPC_ENDPOINT_REGION, null);
+        String vpcEndpointUrl = configFile.getStringPropertyWithDefault(AWSSecretsManagerDriver.PROPERTY_PREFIX+"."+PROPERTY_VPC_ENDPOINT_URL, null);
+        String vpcEndpointRegion = configFile.getStringPropertyWithDefault(AWSSecretsManagerDriver.PROPERTY_PREFIX+"."+PROPERTY_VPC_ENDPOINT_REGION, null);
         String envRegion = System.getenv(REGION_ENVIRONMENT_VARIABLE);
-        String configRegion = Config.getStringPropertyWithDefault(AWSSecretsManagerDriver.PROPERTY_PREFIX+"."+PROPERTY_REGION, null);
+        String configRegion = configFile.getStringPropertyWithDefault(AWSSecretsManagerDriver.PROPERTY_PREFIX+"."+PROPERTY_REGION, null);
 
 
         //Apply settings to our builder configuration.

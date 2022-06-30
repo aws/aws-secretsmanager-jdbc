@@ -4,20 +4,21 @@ package com.amazonaws.secretsmanager.util;
 import com.amazonaws.secretsmanager.sql.AWSSecretsManagerDriver;
 import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-
-
 import static org.mockito.Mockito.when;
 import static org.junit.Assert.*;
+
+import org.junit.runner.RunWith;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 
 import static com.amazonaws.secretsmanager.util.JDBCSecretCacheBuilderProvider.*;
 
 
 @RunWith(PowerMockRunner.class)
+@PowerMockIgnore("jdk.internal.reflect.*")
 @PrepareForTest({Config.class, System.class, JDBCSecretCacheBuilderProvider.class})
 public class JDBCSecretCacheBuilderProviderTest {
 

@@ -27,9 +27,9 @@
     <aws-secretsmanager-cache.version>1.0.2</aws-secretsmanager-cache.version>
     <lombok.version>1.18.24</lombok.version>
     <jackson.version>2.13.2.2</jackson.version>
-    <junit.version>4.13.2</junit.version>
-    <mockito.version>3.3.3</mockito.version>
-    <powermock.version>2.0.9</powermock.version>
+    <junit.version>4.13.1</junit.version>
+    <mockito.version>1.10.19</mockito.version>
+    <powermock.version>1.7.0</powermock.version>
     <compiler.plugin.version>3.2</compiler.plugin.version>
     <javadoc.plugin.version>3.0.1</javadoc.plugin.version>
     <source.plugin.version>3.0.1</source.plugin.version>
@@ -107,7 +107,7 @@
 
     <dependency>
       <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
+      <artifactId>mockito-all</artifactId>
       <version>${mockito.version}</version>
       <scope>test</scope>
     </dependency>
@@ -121,7 +121,7 @@
 
     <dependency>
       <groupId>org.powermock</groupId>
-      <artifactId>powermock-api-mockito2</artifactId>
+      <artifactId>powermock-api-mockito</artifactId>
       <version>${powermock.version}</version>
       <scope>test</scope>
     </dependency>
