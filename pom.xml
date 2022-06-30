@@ -16,7 +16,7 @@
   <artifactId>aws-secretsmanager-jdbc</artifactId>
   <packaging>jar</packaging>
   <name>AWS Secrets Manager SQL Connection Library</name>
-  <version>1.0.8</version>
+  <version>1.0.9</version>
   <description>The AWS Secrets Manager SQL Connection Library for Java enables Java developers to easily
     connect to SQL databases using secrets stored in AWS Secrets Manager.
   </description>
