@@ -1,6 +1,6 @@
 # AWS Secrets Manager JDBC Library
 
-![build](https://github.com/aws/aws-secretsmanager-jdbc/actions/workflows/CI.yml/badge.svg)
+[![Java Build](https://github.com/aws/aws-secretsmanager-jdbc/actions/workflows/CI.yml/badge.svg?event=push)](https://github.com/aws/aws-secretsmanager-jdbc/actions/workflows/CI.yml)
 
 The **AWS Secrets Manager JDBC Library** enables Java developers to easily connect to SQL databases using secrets stored in AWS Secrets Manager.
 
