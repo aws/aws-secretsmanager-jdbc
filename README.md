@@ -102,6 +102,7 @@ drivers.vpcEndpointUrl= #The endpoint URL
 drivers.vpcEndpointRegion= #The endpoint region
 ```
 Both options must be set in order for this option to take effect.
+
 2) Override the region by setting the 'AWS_SECRET_JDBC_REGION' environment variable to the preferred region.
 
 3) Override the region via the secretsmanager.properties file.
