@@ -229,9 +229,8 @@ public class AWSSecretsManagerDriverTest extends TestClass {
     }
 
     @Test
-    public void test_connect_works_secretId() {
+    public void test_connect_works_secretId_in_url() {
         Properties props = new Properties();
-        props.setProperty("user", "user");
         assertNotThrows(() -> sut.connect("someSecretId", props));
         assertEquals(1, DummyDriver.connectCallCount);
     }

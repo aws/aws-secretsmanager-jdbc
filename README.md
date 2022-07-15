@@ -92,3 +92,5 @@ The secret being used should be in the JSON format we use for our rotation lambd
 	...
 }
 ```
+
+Alternatively, you can pass the secret ID as the jdbc uri and omit user. The JDBC connection details such as host, port, dbname will be obtained from your secrets manager secret.
