@@ -3,7 +3,9 @@ package com.amazonaws.secretsmanager.util;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.secretsmanager.sql.AWSSecretsManagerDriver;
 import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
+import com.amazonaws.util.StringUtils;
 
+import static com.amazonaws.util.StringUtils.isNullOrEmpty;
 
 /**
  * <p>
@@ -63,11 +65,11 @@ public class JDBCSecretCacheBuilderProvider {
 
 
         //Apply settings to our builder configuration.
-        if (vpcEndpointUrl != null && !vpcEndpointUrl.isEmpty() && vpcEndpointRegion != null && !vpcEndpointRegion.isEmpty()) {
+        if ( !isNullOrEmpty(vpcEndpointUrl) && !isNullOrEmpty(vpcEndpointRegion) ) {
             builder.setEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(vpcEndpointUrl, vpcEndpointRegion));
-        } else if ( envRegion != null && !envRegion.isEmpty() ) {
+        } else if ( !isNullOrEmpty(envRegion) ) {
             builder.withRegion(envRegion);
-        } else if ( configRegion != null && !configRegion.isEmpty() ) {
+        } else if ( !isNullOrEmpty(configRegion) ) {
             builder.withRegion(configRegion);
         }
 
