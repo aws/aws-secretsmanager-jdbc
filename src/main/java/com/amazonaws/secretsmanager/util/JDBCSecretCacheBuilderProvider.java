@@ -3,7 +3,6 @@ package com.amazonaws.secretsmanager.util;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.secretsmanager.sql.AWSSecretsManagerDriver;
 import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
-import com.amazonaws.util.StringUtils;
 
 import static com.amazonaws.util.StringUtils.isNullOrEmpty;
 
