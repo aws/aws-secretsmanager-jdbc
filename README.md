@@ -92,3 +92,20 @@ The secret being used should be in the JSON format we use for our rotation lambd
 	...
 }
 ```
+### Overriding Default Regions
+
+The default region provider chain is used if no adjustments are made. In order to override this default, use one of the following options listed below.
+
+1) Set a PrivateLink DNS endpoint URL and region in the secretsmanager.properties file.
+```text
+drivers.vpcEndpointUrl= #The endpoint URL
+drivers.vpcEndpointRegion= #The endpoint region
+```
+Both options must be set in order for this option to take effect.
+
+2) Override the region by setting the 'AWS_SECRET_JDBC_REGION' environment variable to the preferred region.
+
+3) Override the region via the secretsmanager.properties file.
+```text
+drivers.region= #The region to use.
+```
