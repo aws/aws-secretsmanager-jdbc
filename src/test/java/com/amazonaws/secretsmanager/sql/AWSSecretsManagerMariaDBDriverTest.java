@@ -102,5 +102,21 @@ public class AWSSecretsManagerMariaDBDriverTest extends TestClass {
         AWSSecretsManagerMariaDBDriver sut2 = new AWSSecretsManagerMariaDBDriver(cache);
         assertEquals(getFieldFrom(sut2, "realDriverClass"), sut2.getDefaultDriverClass());
     }
+
+    @Test
+    public void test_isExceptionDueToAuthenticationError_returnsTrue_correctWrappedException() {
+        SQLException e = new SQLException("", "", 1045);
+        SQLException wrapper = new SQLException("", "", 0, e);
+
+        assertTrue(sut.isExceptionDueToAuthenticationError(wrapper));
+    }
+
+    @Test
+    public void test_isExceptionDueToAuthenticationError_returnsFalse_wrongWrappedSQLException() {
+        SQLException e = new SQLException("", "", 1046);
+        SQLException wrapper = new SQLException("", "", 0, e);
+
+        assertFalse(sut.isExceptionDueToAuthenticationError(wrapper));
+    }
 }
 

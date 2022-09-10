@@ -106,11 +106,20 @@ public final class AWSSecretsManagerMariaDBDriver extends AWSSecretsManagerDrive
 
     @Override
     public boolean isExceptionDueToAuthenticationError(Exception e) {
-        if (e instanceof SQLException) {
-            SQLException sqle = (SQLException) e;
-            int errorCode = sqle.getErrorCode();
-            return errorCode == ACCESS_DENIED_FOR_USER_USING_PASSWORD_TO_DATABASE;
-        }
+        Throwable t = e;
+        do {
+            if (t instanceof SQLException) {
+                SQLException sqle = (SQLException) t;
+                int errorCode = sqle.getErrorCode();
+                if (errorCode == ACCESS_DENIED_FOR_USER_USING_PASSWORD_TO_DATABASE) {
+                    return true;
+                } else {
+                    t = t.getCause();
+                }
+            } else {
+                t = t.getCause();
+            }
+        } while (t != null);
         return false;
     }
 
