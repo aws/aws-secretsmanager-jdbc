@@ -70,7 +70,7 @@ public final class Config {
         InputStream configFile;
 
         try {
-            configFile = ClassLoader.getSystemResourceAsStream(resourceName);
+            configFile = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourceName);
             if(configFile != null) {
                 newConfig.load(configFile);
                 configFile.close();
