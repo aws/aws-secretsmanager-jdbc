@@ -12,8 +12,6 @@
  */
 package com.amazonaws.secretsmanager.sql;
 
-import java.sql.SQLException;
-
 import com.amazonaws.secretsmanager.caching.SecretCache;
 import com.amazonaws.secretsmanager.caching.SecretCacheConfiguration;
 import com.amazonaws.secretsmanager.util.ExceptionUtils;
