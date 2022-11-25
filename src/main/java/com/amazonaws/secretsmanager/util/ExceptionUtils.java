@@ -7,12 +7,13 @@ import java.util.List;
 public class ExceptionUtils {
 
     /**
-     * Will check the thrown SQLException and all parent exceptions until the errorCode is found,
-     *  or the root exception is reached.
+     * Checks the thrown exception and all parent exceptions and returns true if
+     *   a SQLException with a matching error code is found.
      *
      * @param t The SQLException to check
      * @param errorCode The error code to check for.
-     * @return
+     * @return True if the exception or any parent exception is a SQL Exception
+     *      and getErrorCode matches the error code.  Otherwise, false.
      */
     public static boolean unwrapAndCheckForCode(Throwable t, int errorCode) {
         final List<Throwable> list = new ArrayList<>();
