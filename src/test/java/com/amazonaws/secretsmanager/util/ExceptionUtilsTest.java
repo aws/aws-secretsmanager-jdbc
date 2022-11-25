@@ -42,4 +42,28 @@ public class ExceptionUtilsTest {
 
         assertFalse(ExceptionUtils.unwrapAndCheckForCode(e1, 1046));
     }
+
+    @Test
+    public void test_unwrapAndCheckForCode_nonSqlException_parentStillGetsFound() {
+        SQLException e0 = new SQLException("", "", 1046);
+        Exception e1 = new Exception("test", e0);
+        SQLException e2 = new SQLException("", "", 42,e1);
+
+        assertTrue(ExceptionUtils.unwrapAndCheckForCode(e2, 1046));
+    }
+
+    @Test
+    public void test_unwrapAndCheckForCode_nonSqlExceptionWithParent_parentGetsFound() {
+        Exception e1 = new SQLException("", "", 1046);
+        Exception e2 = new Exception(e1);
+
+        assertTrue(ExceptionUtils.unwrapAndCheckForCode(e2, 1046));
+    }
+
+    @Test
+    public void test_unwrapAndCheckForCode_nonSqlException_returnsFalse() {
+        Exception exception = new Exception();
+
+        assertFalse(ExceptionUtils.unwrapAndCheckForCode(exception, 1046));
+    }
 }
