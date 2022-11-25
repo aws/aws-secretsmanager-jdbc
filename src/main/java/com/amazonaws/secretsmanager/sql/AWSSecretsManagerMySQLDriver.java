@@ -12,10 +12,9 @@
  */
 package com.amazonaws.secretsmanager.sql;
 
-import java.sql.SQLException;
-
 import com.amazonaws.secretsmanager.caching.SecretCache;
 import com.amazonaws.secretsmanager.caching.SecretCacheConfiguration;
+import com.amazonaws.secretsmanager.util.ExceptionUtils;
 import com.amazonaws.services.secretsmanager.AWSSecretsManager;
 import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
 import com.amazonaws.util.StringUtils;
@@ -106,12 +105,7 @@ public final class AWSSecretsManagerMySQLDriver extends AWSSecretsManagerDriver 
 
     @Override
     public boolean isExceptionDueToAuthenticationError(Exception e) {
-        if (e instanceof SQLException) {
-            SQLException sqle = (SQLException) e;
-            int errorCode = sqle.getErrorCode();
-            return errorCode == ACCESS_DENIED_FOR_USER_USING_PASSWORD_TO_DATABASE;
-        }
-        return false;
+        return ExceptionUtils.unwrapAndCheckForCode(e, ACCESS_DENIED_FOR_USER_USING_PASSWORD_TO_DATABASE);
     }
 
     @Override
