@@ -14,7 +14,7 @@ package com.amazonaws.secretsmanager.sql;
 
 import com.amazonaws.secretsmanager.caching.SecretCache;
 import com.amazonaws.secretsmanager.caching.SecretCacheConfiguration;
-import com.amazonaws.secretsmanager.util.ExceptionUtils;
+import com.amazonaws.secretsmanager.util.SQLExceptionUtils;
 import com.amazonaws.services.secretsmanager.AWSSecretsManager;
 import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
 import com.amazonaws.util.StringUtils;
@@ -105,7 +105,7 @@ public final class AWSSecretsManagerMySQLDriver extends AWSSecretsManagerDriver 
 
     @Override
     public boolean isExceptionDueToAuthenticationError(Exception e) {
-        return ExceptionUtils.unwrapAndCheckForCode(e, ACCESS_DENIED_FOR_USER_USING_PASSWORD_TO_DATABASE);
+        return SQLExceptionUtils.unwrapAndCheckForCode(e, ACCESS_DENIED_FOR_USER_USING_PASSWORD_TO_DATABASE);
     }
 
     @Override

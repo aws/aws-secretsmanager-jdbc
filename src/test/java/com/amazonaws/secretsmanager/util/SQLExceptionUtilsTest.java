@@ -8,12 +8,12 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 
-public class ExceptionUtilsTest {
+public class SQLExceptionUtilsTest {
 
 
     @Test
     public void test_unwrapAndCheckForCode_nullReturnsFalse() {
-        assertFalse(ExceptionUtils.unwrapAndCheckForCode(null, 1045));
+        assertFalse(SQLExceptionUtils.unwrapAndCheckForCode(null, 1045));
     }
 
 
@@ -22,7 +22,7 @@ public class ExceptionUtilsTest {
         SQLException e = new SQLException("", "", 1045);
         SQLException wrapper = new SQLException("", "", 0, e);
 
-        assertTrue(ExceptionUtils.unwrapAndCheckForCode(wrapper, 1045));
+        assertTrue(SQLExceptionUtils.unwrapAndCheckForCode(wrapper, 1045));
     }
 
     @Test
@@ -30,7 +30,7 @@ public class ExceptionUtilsTest {
         SQLException e = new SQLException("", "", 42);
         SQLException wrapper = new SQLException("", "", 0, e);
 
-        assertFalse(ExceptionUtils.unwrapAndCheckForCode(wrapper, 1045));
+        assertFalse(SQLExceptionUtils.unwrapAndCheckForCode(wrapper, 1045));
     }
 
 
@@ -40,7 +40,7 @@ public class ExceptionUtilsTest {
         SQLException e2 = new SQLException("", "", 0, e1);
         e1.initCause(e2);
 
-        assertFalse(ExceptionUtils.unwrapAndCheckForCode(e1, 1046));
+        assertFalse(SQLExceptionUtils.unwrapAndCheckForCode(e1, 1046));
     }
 
     @Test
@@ -49,7 +49,7 @@ public class ExceptionUtilsTest {
         Exception e1 = new Exception("test", e0);
         SQLException e2 = new SQLException("", "", 42,e1);
 
-        assertTrue(ExceptionUtils.unwrapAndCheckForCode(e2, 1046));
+        assertTrue(SQLExceptionUtils.unwrapAndCheckForCode(e2, 1046));
     }
 
     @Test
@@ -57,13 +57,13 @@ public class ExceptionUtilsTest {
         Exception e1 = new SQLException("", "", 1046);
         Exception e2 = new Exception(e1);
 
-        assertTrue(ExceptionUtils.unwrapAndCheckForCode(e2, 1046));
+        assertTrue(SQLExceptionUtils.unwrapAndCheckForCode(e2, 1046));
     }
 
     @Test
     public void test_unwrapAndCheckForCode_nonSqlException_returnsFalse() {
         Exception exception = new Exception();
 
-        assertFalse(ExceptionUtils.unwrapAndCheckForCode(exception, 1046));
+        assertFalse(SQLExceptionUtils.unwrapAndCheckForCode(exception, 1046));
     }
 }

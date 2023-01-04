@@ -4,7 +4,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ExceptionUtils {
+public class SQLExceptionUtils {
 
     /**
      * Checks the thrown exception and all parent exceptions and returns true if
@@ -31,5 +31,5 @@ public class ExceptionUtils {
     /**
      * Hide constructor for static class
      */
-    private ExceptionUtils() { }
+    private SQLExceptionUtils() { }
 }
