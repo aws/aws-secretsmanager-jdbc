@@ -342,8 +342,10 @@ public abstract class AWSSecretsManagerDriver implements Driver {
                 JsonNode jsonObject = mapper.readTree(secretString);
                 updatedInfo.setProperty("user", jsonObject.get("username").asText());
                 updatedInfo.setProperty("password", jsonObject.get("password").asText());
-            } catch (IOException e) {
-                // Most likely to occur in the event that the data is not JSON. This is more of a user error.
+            } catch (IOException | NullPointerException e) {
+                // Most likely to occur in the event that the data is not JSON.
+                // Or the secret's username and/or password fields have been
+                // removed entirely. Either scenario is most often a user error.
                 throw new RuntimeException(INVALID_SECRET_STRING_JSON);
             }
 
