@@ -342,8 +342,10 @@ public abstract class AWSSecretsManagerDriver implements Driver {
                 JsonNode jsonObject = mapper.readTree(secretString);
                 updatedInfo.setProperty("user", jsonObject.get("username").asText());
                 updatedInfo.setProperty("password", jsonObject.get("password").asText());
-            } catch (IOException e) {
-                // Most likely to occur in the event that the data is not JSON. This is more of a user error.
+            } catch (IOException | NullPointerException e) {
+                // Most likely to occur in the event that the data is not JSON.
+                // Or the secret's username and/or password fields have been
+                // removed entirely. Either scenario is most often a user error.
                 throw new RuntimeException(INVALID_SECRET_STRING_JSON);
             }
 
@@ -376,13 +378,12 @@ public abstract class AWSSecretsManagerDriver implements Driver {
         if (url.startsWith(SCHEME)) { // If this is a URL in the correct scheme, unwrap it
             unwrappedUrl = unwrapUrl(url);
         } else { // Else, assume this is a secret ID and try to retrieve it
-            String secretString = secretCache.getSecretString(url);
-            if (StringUtils.isNullOrEmpty(secretString)) {
-                throw new IllegalArgumentException("URL " + url + " is not a valid URL starting with scheme " +
-                        SCHEME + " or a valid retrievable secret ID ");
-            }
-
             try {
+                String secretString = secretCache.getSecretString(url);
+                if (StringUtils.isNullOrEmpty(secretString)) {
+                    throw new IllegalArgumentException("URL " + url + " is not a valid URL starting with scheme " +
+                            SCHEME + " or a valid retrievable secret ID ");
+                }
                 JsonNode jsonObject = mapper.readTree(secretString);
                 String endpoint = jsonObject.get("host").asText();
                 JsonNode portNode = jsonObject.get("port");
@@ -390,8 +391,10 @@ public abstract class AWSSecretsManagerDriver implements Driver {
                 JsonNode dbnameNode = jsonObject.get("dbname");
                 String dbname = dbnameNode == null ? null : dbnameNode.asText();
                 unwrappedUrl = constructUrlFromEndpointPortDatabase(endpoint, port, dbname);
-            } catch (IOException e) {
-                // Most likely to occur in the event that the data is not JSON. This is more of a user error.
+            } catch (IOException | NullPointerException e) {
+                // Most likely to occur in the event that the data is not JSON.
+                // Or the secret has been modified and is no longer valid.
+                // Either scenario is most often a user error.
                 throw new RuntimeException(INVALID_SECRET_STRING_JSON);
             }
         }
