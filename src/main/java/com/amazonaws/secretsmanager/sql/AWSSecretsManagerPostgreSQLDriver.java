@@ -44,7 +44,10 @@ public final class AWSSecretsManagerPostgreSQLDriver extends AWSSecretsManagerDr
     public static final String SUBPREFIX = "postgresql";
 
     static {
-        AWSSecretsManagerDriver.register(new AWSSecretsManagerPostgreSQLDriver());
+        AWSSecretsManagerDriver driver = new AWSSecretsManagerPostgreSQLDriver();
+        AWSSecretsManagerDriver.register(driver);
+        // Prime the class loader
+        driver.getWrappedDriver();
     }
 
     /**
