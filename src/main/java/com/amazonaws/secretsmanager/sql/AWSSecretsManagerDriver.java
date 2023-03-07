@@ -135,6 +135,8 @@ public abstract class AWSSecretsManagerDriver implements Driver {
 
         setProperties();
         AWSSecretsManagerDriver.register(this);
+
+        getWrappedDriver();
     }
 
     /**
