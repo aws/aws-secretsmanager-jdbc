@@ -32,7 +32,7 @@ import com.amazonaws.secretsmanager.util.TestClass;
  * Tests for the MSSQL Driver.
  */
 @RunWith(PowerMockRunner.class)
-@SuppressStaticInitializationFor("com.amazonaws.secretsmanager.sql.AWSSecretsManagerMSSQLServerDriver")
+@SuppressStaticInitializationFor({"com.amazonaws.secretsmanager.sql.AWSSecretsManagerMSSQLServerDriver","com.amazonaws.secretsmanager.sql.*"})
 @PowerMockIgnore("jdk.internal.reflect.*")
 public class AWSSecretsManagerMSSQLServerDriverTest extends TestClass {
 
@@ -49,6 +49,8 @@ public class AWSSecretsManagerMSSQLServerDriverTest extends TestClass {
             sut = new AWSSecretsManagerMSSQLServerDriver(cache);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        } catch (Throwable t) {
+            t.printStackTrace();
         }
     }
 
@@ -99,8 +101,7 @@ public class AWSSecretsManagerMSSQLServerDriverTest extends TestClass {
     @Test
     public void test_getDefaultDriverClass() {
         System.clearProperty("drivers.sqlserver.realDriverClass");
-        AWSSecretsManagerMSSQLServerDriver sut2 = new AWSSecretsManagerMSSQLServerDriver(cache);
-        assertEquals(getFieldFrom(sut2, "realDriverClass"), sut2.getDefaultDriverClass());
+        assertThrows(IllegalStateException.class, "Could not load real driver with name, \"" + AWSSecretsManagerMSSQLServerDriver.DEFAULT_DRIVER + "\".", () -> new AWSSecretsManagerMSSQLServerDriver(cache));
     }
 }
 

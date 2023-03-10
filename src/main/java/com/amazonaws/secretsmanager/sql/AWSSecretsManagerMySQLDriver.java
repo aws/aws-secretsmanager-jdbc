@@ -122,8 +122,12 @@ public final class AWSSecretsManagerMySQLDriver extends AWSSecretsManagerDriver 
 
     @Override
     public String getDefaultDriverClass() {
+        return getStaticDefaultDriverClass();
+    }
+
+    public static String getStaticDefaultDriverClass() {
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver", false, this.getClass().getClassLoader());
+            Class.forName("com.mysql.cj.jdbc.Driver", false, AWSSecretsManagerMySQLDriver.class.getClassLoader());
             return "com.mysql.cj.jdbc.Driver";
         } catch (ClassNotFoundException e) {
             return "com.mysql.jdbc.Driver";

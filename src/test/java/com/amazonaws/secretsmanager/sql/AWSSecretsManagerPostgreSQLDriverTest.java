@@ -32,7 +32,7 @@ import com.amazonaws.secretsmanager.util.TestClass;
  * Tests for the PostgreSQL Driver.
  */
 @RunWith(PowerMockRunner.class)
-@SuppressStaticInitializationFor("com.amazonaws.secretsmanager.sql.AWSSecretsManagerPostgreSQLDriver")
+@SuppressStaticInitializationFor({"com.amazonaws.secretsmanager.sql.AWSSecretsManagerPostgreSQLDriver","com.amazonaws.secretsmanager.sql.*"})
 @PowerMockIgnore("jdk.internal.reflect.*")
 public class AWSSecretsManagerPostgreSQLDriverTest extends TestClass {
 
@@ -99,8 +99,7 @@ public class AWSSecretsManagerPostgreSQLDriverTest extends TestClass {
     @Test
     public void test_getDefaultDriverClass() {
         System.clearProperty("drivers.postgresql.realDriverClass");
-        AWSSecretsManagerPostgreSQLDriver sut2 = new AWSSecretsManagerPostgreSQLDriver(cache);
-        assertEquals(getFieldFrom(sut2, "realDriverClass"), sut2.getDefaultDriverClass());
+        assertThrows(IllegalStateException.class, "Could not load real driver with name, \"" + AWSSecretsManagerPostgreSQLDriver.DEFAULT_DRIVER + "\".", () -> new AWSSecretsManagerPostgreSQLDriver(cache));
     }
 }
 

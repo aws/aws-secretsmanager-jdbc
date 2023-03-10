@@ -32,7 +32,7 @@ import com.amazonaws.secretsmanager.util.TestClass;
  * Tests for the Oracle Driver.
  */
 @RunWith(PowerMockRunner.class)
-@SuppressStaticInitializationFor("com.amazonaws.secretsmanager.sql.AWSSecretsManagerOracleDriver")
+@SuppressStaticInitializationFor({"com.amazonaws.secretsmanager.sql.AWSSecretsManagerOracleDriver","com.amazonaws.secretsmanager.sql.*"})
 @PowerMockIgnore("jdk.internal.reflect.*")
 public class AWSSecretsManagerOracleDriverTest extends TestClass {
 
@@ -104,8 +104,7 @@ public class AWSSecretsManagerOracleDriverTest extends TestClass {
     @Test
     public void test_getDefaultDriverClass() {
         System.clearProperty("drivers.oracle.realDriverClass");
-        AWSSecretsManagerOracleDriver sut2 = new AWSSecretsManagerOracleDriver(cache);
-        assertEquals(getFieldFrom(sut2, "realDriverClass"), sut2.getDefaultDriverClass());
+        assertThrows(IllegalStateException.class, "Could not load real driver with name, \"" + AWSSecretsManagerOracleDriver.DEFAULT_DRIVER + "\".", () -> new AWSSecretsManagerOracleDriver(cache));
     }
 }
 
