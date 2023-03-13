@@ -93,3 +93,6 @@ The secret being used should be in the JSON format we use for our rotation lambd
 }
 ```
 
+## Credentials
+
+This library uses the [Default Credential Provider Chain](https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html). If you are running this driver on EKS, this could cause the library to pick up the credentials of the node it is running on instead of the service account role ([issue](https://github.com/aws/aws-secretsmanager-jdbc/issues/55)). To address this, add version `1` of `com.amazonaws:aws-java-sdk-sts` to your Gradle/Maven project file as a dependency.
