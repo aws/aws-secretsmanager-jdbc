@@ -93,3 +93,19 @@ The secret being used should be in the JSON format we use for our rotation lambd
 }
 ```
 
+## Credentials
+
+This library uses the [Default Credential Provider Chain](https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html). The following options exist to override some of the defaults:
+
+1) Set a PrivateLink DNS endpoint URL and a region in the secretsmanager.properties file:
+```text
+drivers.vpcEndpointUrl= #The endpoint URL
+drivers.vpcEndpointRegion= #The endpoint region
+```
+
+2) Override the primary region by setting the 'AWS_SECRET_JDBC_REGION' environment variable to the preferred region, or via the secretsmanager.properties file:
+```text
+drivers.region= #The region to use.
+```
+
+If this driver is running on EKS, the library could pick up the credentials of the node it is running on instead of the service account role ([issue](https://github.com/aws/aws-secretsmanager-jdbc/issues/55)). To address this, add version `1` of `com.amazonaws:aws-java-sdk-sts` to your Gradle/Maven project file as a dependency.
