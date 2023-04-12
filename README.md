@@ -25,7 +25,7 @@ The recommended way to use the SQL Connection Library is to consume it from Mave
 <dependency>
     <groupId>com.amazonaws.secretsmanager</groupId>
     <artifactId>aws-secretsmanager-jdbc</artifactId>
-    <version>1.0.8</version>
+    <version>1.0.12</version>
 </dependency>
 ```
 
