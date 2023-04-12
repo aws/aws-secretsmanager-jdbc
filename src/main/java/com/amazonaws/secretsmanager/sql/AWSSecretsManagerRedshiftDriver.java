@@ -129,6 +129,6 @@ public final class AWSSecretsManagerRedshiftDriver extends AWSSecretsManagerDriv
 
     @Override
     public String getDefaultDriverClass() {
-        return "com.amazon.redshift.jdbc42.Driver";
+        return "com.amazon.redshift.Driver";
     }
 }
