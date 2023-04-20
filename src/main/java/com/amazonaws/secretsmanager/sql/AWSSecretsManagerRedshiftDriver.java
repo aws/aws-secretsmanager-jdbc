@@ -46,7 +46,7 @@ public final class AWSSecretsManagerRedshiftDriver extends AWSSecretsManagerDriv
     /**
      * Default driver class to use.
      */
-    public static final String DEFAULT_DRIVER = "com.amazon.redshift.jdbc42.Driver";
+    public static final String DEFAULT_DRIVER = "com.amazon.redshift.Driver";
 
     static {
         AWSSecretsManagerDriver.register(new AWSSecretsManagerRedshiftDriver());
