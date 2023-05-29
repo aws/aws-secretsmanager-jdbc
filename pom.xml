@@ -25,7 +25,7 @@
   <properties>
     <aws-java-sdk.version>1.12.252</aws-java-sdk.version>
     <aws-secretsmanager-cache.version>1.0.2</aws-secretsmanager-cache.version>
-    <lombok.version>1.18.24</lombok.version>
+    <lombok.version>1.18.28</lombok.version>
     <jackson.version>2.14.1</jackson.version>
     <junit.version>4.13.2</junit.version>
     <mockito.version>1.10.19</mockito.version>
