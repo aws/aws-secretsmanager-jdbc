@@ -23,7 +23,7 @@
   <url>https://aws.amazon.com/secrets-manager</url>
 
   <properties>
-    <aws-java-sdk.version>1.12.252</aws-java-sdk.version>
+    <aws-java-sdk.version>1.12.487</aws-java-sdk.version>
     <aws-secretsmanager-cache.version>1.0.2</aws-secretsmanager-cache.version>
     <lombok.version>1.18.24</lombok.version>
     <jackson.version>2.14.1</jackson.version>
