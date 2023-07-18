@@ -15,9 +15,10 @@ package com.amazonaws.secretsmanager.sql;
 import com.amazonaws.secretsmanager.caching.SecretCache;
 import com.amazonaws.secretsmanager.caching.SecretCacheConfiguration;
 import com.amazonaws.secretsmanager.util.SQLExceptionUtils;
-import com.amazonaws.services.secretsmanager.AWSSecretsManager;
-import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
-import com.amazonaws.util.StringUtils;
+
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClientBuilder;
+import software.amazon.awssdk.utils.StringUtils;
 
 /**
  * <p>
@@ -74,7 +75,7 @@ public final class AWSSecretsManagerMariaDBDriver extends AWSSecretsManagerDrive
      *
      * @param builder                                           Builder used to instantiate cache
      */
-    public AWSSecretsManagerMariaDBDriver(AWSSecretsManagerClientBuilder builder) {
+    public AWSSecretsManagerMariaDBDriver(SecretsManagerClientBuilder builder) {
         super(builder);
     }
 
@@ -84,7 +85,7 @@ public final class AWSSecretsManagerMariaDBDriver extends AWSSecretsManagerDrive
      *
      * @param client                                            AWS Secrets Manager client to instantiate cache
      */
-    public AWSSecretsManagerMariaDBDriver(AWSSecretsManager client) {
+    public AWSSecretsManagerMariaDBDriver(SecretsManagerClient client) {
         super(client);
     }
 
@@ -111,10 +112,10 @@ public final class AWSSecretsManagerMariaDBDriver extends AWSSecretsManagerDrive
     @Override
     public String constructUrlFromEndpointPortDatabase(String endpoint, String port, String dbname) {
         String url = "jdbc:mariadb://" + endpoint;
-        if (!StringUtils.isNullOrEmpty(port)) {
+        if (StringUtils.isNotBlank(port)) {
             url += ":" + port;
         }
-        if (!StringUtils.isNullOrEmpty(dbname)) {
+        if (StringUtils.isNotBlank(dbname)) {
             url += "/" + dbname;
         }
         return url;

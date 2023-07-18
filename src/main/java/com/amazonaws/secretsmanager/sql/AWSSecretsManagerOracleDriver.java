@@ -16,9 +16,10 @@ import java.sql.SQLException;
 
 import com.amazonaws.secretsmanager.caching.SecretCache;
 import com.amazonaws.secretsmanager.caching.SecretCacheConfiguration;
-import com.amazonaws.services.secretsmanager.AWSSecretsManager;
-import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
-import com.amazonaws.util.StringUtils;
+
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClientBuilder;
+import software.amazon.awssdk.utils.StringUtils;
 
 /**
  * <p>
@@ -89,7 +90,7 @@ public final class AWSSecretsManagerOracleDriver extends AWSSecretsManagerDriver
      *
      * @param builder                                           Builder used to instantiate cache
      */
-    public AWSSecretsManagerOracleDriver(AWSSecretsManagerClientBuilder builder) {
+    public AWSSecretsManagerOracleDriver(SecretsManagerClientBuilder builder) {
         super(builder);
     }
 
@@ -99,7 +100,7 @@ public final class AWSSecretsManagerOracleDriver extends AWSSecretsManagerDriver
      *
      * @param client                                            AWS Secrets Manager client to instantiate cache
      */
-    public AWSSecretsManagerOracleDriver(AWSSecretsManager client) {
+    public AWSSecretsManagerOracleDriver(SecretsManagerClient client) {
         super(client);
     }
 
@@ -133,10 +134,10 @@ public final class AWSSecretsManagerOracleDriver extends AWSSecretsManagerDriver
     @Override
     public String constructUrlFromEndpointPortDatabase(String endpoint, String port, String dbname) {
         String url = "jdbc:oracle:thin:@//" + endpoint;
-        if (!StringUtils.isNullOrEmpty(port)) {
+        if (StringUtils.isNotBlank(port)) {
             url += ":" + port;
         }
-        if (!StringUtils.isNullOrEmpty(dbname)) {
+        if (StringUtils.isNotBlank(dbname)) {
             url += "/" + dbname;
         }
         return url;
@@ -147,4 +148,3 @@ public final class AWSSecretsManagerOracleDriver extends AWSSecretsManagerDriver
         return "oracle.jdbc.OracleDriver";
     }
 }
-

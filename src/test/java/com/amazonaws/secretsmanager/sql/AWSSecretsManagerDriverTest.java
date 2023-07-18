@@ -12,14 +12,18 @@
  */
 package com.amazonaws.secretsmanager.sql;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
-import static org.junit.Assert.*;
-
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -30,13 +34,13 @@ import org.mockito.stubbing.Answer;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.junit.Before;
 
 import com.amazonaws.secretsmanager.caching.SecretCache;
 import com.amazonaws.secretsmanager.caching.SecretCacheConfiguration;
 import com.amazonaws.secretsmanager.util.TestClass;
-import com.amazonaws.services.secretsmanager.AWSSecretsManager;
-import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
+
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClientBuilder;
 
 /**
  * Tests for AWSSecretsManagerDriver. Uses a config file in the resources folder just to make sure it can read from
@@ -127,13 +131,13 @@ public class AWSSecretsManagerDriverTest extends TestClass {
     @Test
     public void test_init_constructor_null_params() {
         try {
-            new AWSSecretsManagerDummyDriver((AWSSecretsManagerClientBuilder)null);
+            new AWSSecretsManagerDummyDriver((SecretsManagerClientBuilder) null);
         } catch (Exception e) {}
         try {
-            new AWSSecretsManagerDummyDriver((SecretCacheConfiguration)null);
+            new AWSSecretsManagerDummyDriver((SecretCacheConfiguration) null);
         } catch (Exception e) {}
         try {
-            new AWSSecretsManagerDummyDriver((AWSSecretsManager)null);
+            new AWSSecretsManagerDummyDriver((SecretsManagerClient) null);
         } catch (Exception e) {}
     }
 
@@ -343,7 +347,7 @@ public class AWSSecretsManagerDriverTest extends TestClass {
     public void test_getPropertyInfo_propagatesToRealDriver() {
         String param1 = "jdbc-secretsmanager:expectedUrl";
         Properties param2 = new Properties();
-        assertNotThrows(() -> assertEquals(null, sut.getPropertyInfo(param1, param2)));
+        assertNotThrows(() -> Assert.assertNull(sut.getPropertyInfo(param1, param2)));
         assertEquals(1, DummyDriver.getPropertyInfoCallCount);
         String param1Expected = "jdbc:expectedUrl";
         assertEquals(param1Expected, DummyDriver.getPropertyInfoParam1);

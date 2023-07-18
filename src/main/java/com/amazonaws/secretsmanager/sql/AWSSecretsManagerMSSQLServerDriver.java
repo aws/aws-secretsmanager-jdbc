@@ -16,9 +16,10 @@ import java.sql.SQLException;
 
 import com.amazonaws.secretsmanager.caching.SecretCache;
 import com.amazonaws.secretsmanager.caching.SecretCacheConfiguration;
-import com.amazonaws.services.secretsmanager.AWSSecretsManager;
-import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
-import com.amazonaws.util.StringUtils;
+
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClientBuilder;
+import software.amazon.awssdk.utils.StringUtils;
 
 /**
  * <p>
@@ -74,7 +75,7 @@ public final class AWSSecretsManagerMSSQLServerDriver extends AWSSecretsManagerD
      *
      * @param builder                                           Builder used to instantiate cache
      */
-    public AWSSecretsManagerMSSQLServerDriver(AWSSecretsManagerClientBuilder builder) {
+    public AWSSecretsManagerMSSQLServerDriver(SecretsManagerClientBuilder builder) {
         super(builder);
     }
 
@@ -84,7 +85,7 @@ public final class AWSSecretsManagerMSSQLServerDriver extends AWSSecretsManagerD
      *
      * @param client                                            AWS Secrets Manager client to instantiate cache
      */
-    public AWSSecretsManagerMSSQLServerDriver(AWSSecretsManager client) {
+    public AWSSecretsManagerMSSQLServerDriver(SecretsManagerClient client) {
         super(client);
     }
 
@@ -116,10 +117,10 @@ public final class AWSSecretsManagerMSSQLServerDriver extends AWSSecretsManagerD
     @Override
     public String constructUrlFromEndpointPortDatabase(String endpoint, String port, String dbname) {
         String url = "jdbc:sqlserver://" + endpoint;
-        if (!StringUtils.isNullOrEmpty(port)) {
+        if (StringUtils.isNotBlank(port)) {
             url += ":" + port;
         }
-        if (!StringUtils.isNullOrEmpty(dbname)) {
+        if (StringUtils.isNotBlank(dbname)) {
             url += ";databaseName=" + dbname + ";";
         }
         return url;
@@ -130,4 +131,3 @@ public final class AWSSecretsManagerMSSQLServerDriver extends AWSSecretsManagerD
         return "com.microsoft.sqlserver.jdbc.SQLServerDriver";
     }
 }
-
