@@ -116,8 +116,11 @@ public final class AWSSecretsManagerPostgreSQLDriver extends AWSSecretsManagerDr
         if (!StringUtils.isNullOrEmpty(port)) {
             url += ":" + port;
         }
+
+        url += "/";
+
         if (!StringUtils.isNullOrEmpty(dbname)) {
-            url += "/" + dbname;
+            url += dbname;
         }
         return url;
     }
