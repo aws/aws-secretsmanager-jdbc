@@ -34,7 +34,7 @@
     <javadoc.plugin.version>3.4.0</javadoc.plugin.version>
     <source.plugin.version>3.2.1</source.plugin.version>
     <checkstyle.plugin.version>3.1.2</checkstyle.plugin.version>
-    <findbugs.plugin.version>3.0.5</findbugs.plugin.version>
+    <spotbugs.plugin.version>4.7.3.5</spotbugs.plugin.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
@@ -125,6 +125,7 @@
       <version>${powermock.version}</version>
       <scope>test</scope>
     </dependency>
+
     <dependency>
       <groupId>org.jacoco</groupId>
       <artifactId>org.jacoco.agent</artifactId>
@@ -194,9 +195,9 @@
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>findbugs-maven-plugin</artifactId>
-        <version>${findbugs.plugin.version}</version>
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-maven-plugin</artifactId>
+        <version>${spotbugs.plugin.version}</version>
         <configuration>
           <effort>Max</effort>
           <threshold>Low</threshold>

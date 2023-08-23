@@ -342,7 +342,7 @@ public abstract class AWSSecretsManagerDriver implements Driver {
                 JsonNode jsonObject = mapper.readTree(secretString);
                 updatedInfo.setProperty("user", jsonObject.get("username").asText());
                 updatedInfo.setProperty("password", jsonObject.get("password").asText());
-            } catch (IOException | NullPointerException e) {
+            } catch (IOException e) {
                 // Most likely to occur in the event that the data is not JSON.
                 // Or the secret's username and/or password fields have been
                 // removed entirely. Either scenario is most often a user error.
@@ -391,7 +391,7 @@ public abstract class AWSSecretsManagerDriver implements Driver {
                 JsonNode dbnameNode = jsonObject.get("dbname");
                 String dbname = dbnameNode == null ? null : dbnameNode.asText();
                 unwrappedUrl = constructUrlFromEndpointPortDatabase(endpoint, port, dbname);
-            } catch (IOException | NullPointerException e) {
+            } catch (IOException e) {
                 // Most likely to occur in the event that the data is not JSON.
                 // Or the secret has been modified and is no longer valid.
                 // Either scenario is most often a user error.
