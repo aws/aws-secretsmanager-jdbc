@@ -93,7 +93,7 @@ public class AWSSecretsManagerPostgreSQLDriverTest extends TestClass {
     @Test
     public void test_constructUrlNullDatabase() {
         String url = sut.constructUrlFromEndpointPortDatabase("test-endpoint", "1234", null);
-        assertEquals(url, "jdbc:postgresql://test-endpoint:1234");
+        assertEquals(url, "jdbc:postgresql://test-endpoint:1234/");
     }
 
     @Test
