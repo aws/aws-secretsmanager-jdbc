@@ -95,7 +95,7 @@ The secret being used should be in the JSON format we use for our rotation lambd
 
 ## Credentials
 
-This library uses the [Default Credential Provider Chain](https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html). The following options exist to override some of the defaults:
+This library uses the [Default Credential Provider Chain](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials.html). The following options exist to override some of the defaults:
 
 1) Set a PrivateLink DNS endpoint URL and a region in the secretsmanager.properties file:
 ```text
