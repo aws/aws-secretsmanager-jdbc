@@ -108,4 +108,4 @@ drivers.vpcEndpointRegion= #The endpoint region
 drivers.region= #The region to use.
 ```
 
-If this driver is running on EKS, the library could pick up the credentials of the node it is running on instead of the service account role ([issue](https://github.com/aws/aws-secretsmanager-jdbc/issues/55)). To address this, add version `1` of `com.amazonaws:aws-java-sdk-sts` to your Gradle/Maven project file as a dependency.
+If this driver is running on EKS, the library could pick up the credentials of the node it is running on instead of the service account role ([issue](https://github.com/aws/aws-secretsmanager-jdbc/issues/55)). To address this, add version `2` of `software.amazon.awssdk:sts` to your Gradle/Maven project file as a dependency.
