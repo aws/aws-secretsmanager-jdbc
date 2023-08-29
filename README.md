@@ -1,7 +1,7 @@
 # AWS Secrets Manager JDBC Library
 
 [![Java Build](https://github.com/aws/aws-secretsmanager-jdbc/actions/workflows/CI.yml/badge.svg?event=push)](https://github.com/aws/aws-secretsmanager-jdbc/actions/workflows/CI.yml)
-[![Coverage](https://codecov.io/gh/aws/aws-secretsmanager-jdbc/branch/master/graph/badge.svg?token=hCl7eBaSwn)](https://codecov.io/gh/aws/aws-secretsmanager-jdbc)
+[![Coverage](https://codecov.io/gh/aws/aws-secretsmanager-jdbc/branch/v2/graph/badge.svg?token=hCl7eBaSwn)](https://codecov.io/gh/aws/aws-secretsmanager-jdbc)
 
 The **AWS Secrets Manager JDBC Library** enables Java developers to easily connect to SQL databases using secrets stored in AWS Secrets Manager.
 
@@ -25,7 +25,7 @@ The recommended way to use the SQL Connection Library is to consume it from Mave
 <dependency>
     <groupId>com.amazonaws.secretsmanager</groupId>
     <artifactId>aws-secretsmanager-jdbc</artifactId>
-    <version>1.0.12</version>
+    <version>2.0.0</version>
 </dependency>
 ```
 
@@ -95,7 +95,7 @@ The secret being used should be in the JSON format we use for our rotation lambd
 
 ## Credentials
 
-This library uses the [Default Credential Provider Chain](https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/credentials.html). The following options exist to override some of the defaults:
+This library uses the [Default Credential Provider Chain](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials.html). The following options exist to override some of the defaults:
 
 1) Set a PrivateLink DNS endpoint URL and a region in the secretsmanager.properties file:
 ```text

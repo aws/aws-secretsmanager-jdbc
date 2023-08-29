@@ -16,9 +16,10 @@ import java.sql.SQLException;
 
 import com.amazonaws.secretsmanager.caching.SecretCache;
 import com.amazonaws.secretsmanager.caching.SecretCacheConfiguration;
-import com.amazonaws.services.secretsmanager.AWSSecretsManager;
-import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
-import com.amazonaws.util.StringUtils;
+
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClientBuilder;
+import software.amazon.awssdk.utils.StringUtils;
 
 /**
  * <p>
@@ -74,7 +75,7 @@ public final class AWSSecretsManagerRedshiftDriver extends AWSSecretsManagerDriv
      *
      * @param builder Builder used to instantiate cache
      */
-    public AWSSecretsManagerRedshiftDriver(AWSSecretsManagerClientBuilder builder) {
+    public AWSSecretsManagerRedshiftDriver(SecretsManagerClientBuilder builder) {
         super(builder);
     }
 
@@ -85,7 +86,7 @@ public final class AWSSecretsManagerRedshiftDriver extends AWSSecretsManagerDriv
      *
      * @param client AWS Secrets Manager client to instantiate cache
      */
-    public AWSSecretsManagerRedshiftDriver(AWSSecretsManager client) {
+    public AWSSecretsManagerRedshiftDriver(SecretsManagerClient client) {
         super(client);
     }
 
@@ -118,10 +119,10 @@ public final class AWSSecretsManagerRedshiftDriver extends AWSSecretsManagerDriv
     @Override
     public String constructUrlFromEndpointPortDatabase(String endpoint, String port, String dbname) {
         String url = "jdbc:redshift://" + endpoint;
-        if (!StringUtils.isNullOrEmpty(port)) {
+        if (StringUtils.isNotBlank(port)) {
             url += ":" + port;
         }
-        if (!StringUtils.isNullOrEmpty(dbname)) {
+        if (StringUtils.isNotBlank(dbname)) {
             url += "/" + dbname;
         }
         return url;

@@ -1,75 +1,77 @@
 package com.amazonaws.secretsmanager.util;
 
+import static com.amazonaws.secretsmanager.util.JDBCSecretCacheBuilderProvider.PROPERTY_VPC_ENDPOINT_REGION;
+import static com.amazonaws.secretsmanager.util.JDBCSecretCacheBuilderProvider.PROPERTY_VPC_ENDPOINT_URL;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.contrib.java.lang.system.EnvironmentVariables;
 
 import com.amazonaws.secretsmanager.sql.AWSSecretsManagerDriver;
-import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
-import org.junit.Test;
-import static org.mockito.Mockito.when;
-import static org.junit.Assert.*;
 
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import software.amazon.awssdk.core.exception.SdkClientException;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 
-
-import static com.amazonaws.secretsmanager.util.JDBCSecretCacheBuilderProvider.*;
-
-
-@RunWith(PowerMockRunner.class)
-@PowerMockIgnore("jdk.internal.reflect.*")
-@PrepareForTest({Config.class, System.class, JDBCSecretCacheBuilderProvider.class})
 public class JDBCSecretCacheBuilderProviderTest {
+
+    @Rule
+    public final EnvironmentVariables environmentVariables = new EnvironmentVariables();
 
     /**
      * SetRegion Tests.
      */
     @Test
     public void test_setRegion_configFileProperty() {
-        Config configProvider = PowerMockito.mock(Config.class);
-        String regionName = AWSSecretsManagerDriver.PROPERTY_PREFIX+"."+ JDBCSecretCacheBuilderProvider.PROPERTY_REGION;
-        when(configProvider.getStringPropertyWithDefault(regionName, null)).thenReturn("asdf");
+        Config configProvider = mock(Config.class);
+        String regionName = AWSSecretsManagerDriver.PROPERTY_PREFIX + "."
+                + JDBCSecretCacheBuilderProvider.PROPERTY_REGION;
+        when(configProvider.getStringPropertyWithDefault(regionName, null)).thenReturn("us-west-2");
 
-        AWSSecretsManagerClientBuilder builder = new JDBCSecretCacheBuilderProvider(configProvider).build();
+        SecretsManagerClient client = new JDBCSecretCacheBuilderProvider(configProvider).build().build();
 
-        assertEquals("asdf", builder.getRegion());
+        assertEquals(client.serviceClientConfiguration().region(), Region.US_WEST_2);
     }
-
 
     @Test
     public void test_setRegion_environmentVariable() {
-        Config configProvider = PowerMockito.mock(Config.class);
-        PowerMockito.mockStatic(System.class);
+        Config configProvider = mock(Config.class);
 
         String environmentRegionName = JDBCSecretCacheBuilderProvider.REGION_ENVIRONMENT_VARIABLE;
-        when(System.getenv(environmentRegionName)).thenReturn("asdf");
-        assertEquals("asdf", System.getenv(environmentRegionName));
+        environmentVariables.set(environmentRegionName, "us-east-1");
+        assertEquals("us-east-1", System.getenv(environmentRegionName));
 
-        AWSSecretsManagerClientBuilder builder = new JDBCSecretCacheBuilderProvider(configProvider).build();
-        assertEquals("asdf", builder.getRegion());
+        SecretsManagerClient client = new JDBCSecretCacheBuilderProvider(configProvider).build().build();
+        assertEquals(client.serviceClientConfiguration().region(), Region.US_EAST_1);
     }
-
 
     @Test
     public void test_setRegion_vpcEndpoint() {
-        Config configProvider = PowerMockito.mock(Config.class);
-        String vpcEndpointUrlName = AWSSecretsManagerDriver.PROPERTY_PREFIX+"."+PROPERTY_VPC_ENDPOINT_URL;
-        String vpcEndpointRegion = AWSSecretsManagerDriver.PROPERTY_PREFIX+"."+PROPERTY_VPC_ENDPOINT_REGION;
-        when(configProvider.getStringPropertyWithDefault(vpcEndpointUrlName, null)).thenReturn("asdf");
-        when(configProvider.getStringPropertyWithDefault(vpcEndpointRegion, null)).thenReturn("qwerty");
+        Config configProvider = mock(Config.class);
+        String vpcEndpointUrlName = AWSSecretsManagerDriver.PROPERTY_PREFIX + "." + PROPERTY_VPC_ENDPOINT_URL;
+        String vpcEndpointRegion = AWSSecretsManagerDriver.PROPERTY_PREFIX + "." + PROPERTY_VPC_ENDPOINT_REGION;
+        String vpcEndpointUrlString = "https://asdf.us-west-2.amazonaws.com";
+        when(configProvider.getStringPropertyWithDefault(vpcEndpointUrlName, null)).thenReturn(vpcEndpointUrlString);
+        when(configProvider.getStringPropertyWithDefault(vpcEndpointRegion, null)).thenReturn("ap-southeast-3");
 
-        AWSSecretsManagerClientBuilder builder = new JDBCSecretCacheBuilderProvider(configProvider).build();
+        SecretsManagerClient client = new JDBCSecretCacheBuilderProvider(configProvider).build().build();
 
-        assertEquals("asdf", builder.getEndpoint().getServiceEndpoint());
-        assertEquals("qwerty", builder.getEndpoint().getSigningRegion());
+        assertEquals(client.serviceClientConfiguration().endpointOverride().get().toString(), vpcEndpointUrlString);
+        assertEquals(client.serviceClientConfiguration().region(), Region.AP_SOUTHEAST_3);
     }
 
-
     @Test
-    public void test_setRegion_defaultsToNull() {
-        AWSSecretsManagerClientBuilder builder = new JDBCSecretCacheBuilderProvider().build();
-        assertNull(builder.getRegion());
+    public void test_setRegion_defaultsToEnv() {
+        try {
+            new JDBCSecretCacheBuilderProvider().build().build();
+        } catch (SdkClientException e) {
+            assertTrue(e.getMessage().startsWith("Unable to load region from any of the providers in the chain"));
+        }
     }
 
     /**
@@ -78,50 +80,50 @@ public class JDBCSecretCacheBuilderProviderTest {
 
     @Test
     public void test_regionSelectionOrder_prefersVpcEndpointOverEverything() {
-        Config configProvider = PowerMockito.mock(Config.class);
-        PowerMockito.mockStatic(System.class);
+        Config configProvider = mock(Config.class);
 
-        //Arrange so all properties return something valid.
-        String regionName = AWSSecretsManagerDriver.PROPERTY_PREFIX+"."+ JDBCSecretCacheBuilderProvider.PROPERTY_REGION;
-        String vpcEndpointUrlName = AWSSecretsManagerDriver.PROPERTY_PREFIX+"."+PROPERTY_VPC_ENDPOINT_URL;
-        String vpcEndpointRegion = AWSSecretsManagerDriver.PROPERTY_PREFIX+"."+PROPERTY_VPC_ENDPOINT_REGION;
+        // Arrange so all properties return something valid.
+        String regionName = AWSSecretsManagerDriver.PROPERTY_PREFIX + "."
+                + JDBCSecretCacheBuilderProvider.PROPERTY_REGION;
+        String vpcEndpointUrlName = AWSSecretsManagerDriver.PROPERTY_PREFIX + "." + PROPERTY_VPC_ENDPOINT_URL;
+        String vpcEndpointRegion = AWSSecretsManagerDriver.PROPERTY_PREFIX + "." + PROPERTY_VPC_ENDPOINT_REGION;
         String environmentRegionName = JDBCSecretCacheBuilderProvider.REGION_ENVIRONMENT_VARIABLE;
+        String vpcEndpointUrlString = "https://1234.secretsmanager.amazonaws.com";
 
-        //Arrange the return values when the properties are requested.
-        when(System.getenv(environmentRegionName)).thenReturn("0");
-        when(configProvider.getStringPropertyWithDefault(regionName, null)).thenReturn("1");
-        when(configProvider.getStringPropertyWithDefault(vpcEndpointUrlName, null)).thenReturn("2");
-        when(configProvider.getStringPropertyWithDefault(vpcEndpointRegion, null)).thenReturn("3");
+        // Arrange the return values when the properties are requested.
+        environmentVariables.set(environmentRegionName, "us-east-2");
+        when(configProvider.getStringPropertyWithDefault(regionName, null)).thenReturn("us-east-1");
+        when(configProvider.getStringPropertyWithDefault(vpcEndpointUrlName, null))
+                .thenReturn(vpcEndpointUrlString);
+        when(configProvider.getStringPropertyWithDefault(vpcEndpointRegion, null)).thenReturn("us-west-2");
 
-        //Act: Build our clientbuilder.
-        AWSSecretsManagerClientBuilder builder = new JDBCSecretCacheBuilderProvider(configProvider).build();
+        // Act: Build our client
+        SecretsManagerClient client = new JDBCSecretCacheBuilderProvider(configProvider).build().build();
 
-        //Assert: Make sure the endpoint was configured properly.
-        assertEquals("3", builder.getEndpoint().getSigningRegion());
-        assertEquals("2", builder.getEndpoint().getServiceEndpoint());
-        assertNotEquals("1", builder.getRegion());
-        assertNotEquals("0", builder.getRegion());
+        // Assert: Make sure the endpoint was configured properly.
+        assertNotEquals(client.serviceClientConfiguration().region(), Region.US_EAST_2);
+        assertNotEquals(client.serviceClientConfiguration().region(), Region.US_EAST_1);
+        assertEquals(client.serviceClientConfiguration().region(), Region.US_WEST_2);
+        assertEquals(client.serviceClientConfiguration().endpointOverride().get().toString(),
+                vpcEndpointUrlString);
     }
-
-
 
     @Test
     public void test_regionSelectionOrder_prefersEnvironmentVarOverConfig() {
-        Config configProvider = PowerMockito.mock(Config.class);
-        PowerMockito.mockStatic(System.class);
+        Config configProvider = mock(Config.class);
 
-        String regionName = AWSSecretsManagerDriver.PROPERTY_PREFIX+"."+ JDBCSecretCacheBuilderProvider.PROPERTY_REGION;
+        String regionName = AWSSecretsManagerDriver.PROPERTY_PREFIX + "."
+                + JDBCSecretCacheBuilderProvider.PROPERTY_REGION;
         String environmentRegionName = JDBCSecretCacheBuilderProvider.REGION_ENVIRONMENT_VARIABLE;
 
-        when(System.getenv(environmentRegionName)).thenReturn("0");
-        when(configProvider.getStringPropertyWithDefault(regionName, null)).thenReturn("1");
+        environmentVariables.set(environmentRegionName, "eu-west-3");
+        when(configProvider.getStringPropertyWithDefault(regionName, null)).thenReturn("us-east-2");
 
-        AWSSecretsManagerClientBuilder builder = new JDBCSecretCacheBuilderProvider(configProvider).build();
+        SecretsManagerClient client = new JDBCSecretCacheBuilderProvider(configProvider).build().build();
 
-        assertNotEquals("1", builder.getRegion());
-        assertEquals("0", builder.getRegion());
+        assertNotEquals(client.serviceClientConfiguration().region(), Region.US_EAST_2);
+        assertEquals(client.serviceClientConfiguration().region(), Region.EU_WEST_3);
     }
-
 
     /**
      * Variables must be correctly set
@@ -129,86 +131,95 @@ public class JDBCSecretCacheBuilderProviderTest {
     @Test
     public void test_settingValidation_emptyConfigPropertyIgnored() {
 
-        Config configProvider = PowerMockito.mock(Config.class);
-        String regionName = AWSSecretsManagerDriver.PROPERTY_PREFIX+"."+ JDBCSecretCacheBuilderProvider.PROPERTY_REGION;
+        Config configProvider = mock(Config.class);
+        String regionName = AWSSecretsManagerDriver.PROPERTY_PREFIX + "."
+                + JDBCSecretCacheBuilderProvider.PROPERTY_REGION;
         when(configProvider.getStringPropertyWithDefault(regionName, null)).thenReturn("");
 
-        AWSSecretsManagerClientBuilder builder = new JDBCSecretCacheBuilderProvider(configProvider).build();
-
-        assertNull(builder.getRegion());
+        try {
+            new JDBCSecretCacheBuilderProvider(configProvider).build().build();
+        } catch (SdkClientException e) {
+            assertTrue(e.getMessage().startsWith("Unable to load region from any of the providers in the chain"));
+        }
     }
 
     @Test
     public void test_settingValidation_nullConfigPropertyIgnored() {
 
-        Config configProvider = PowerMockito.mock(Config.class);
-        String regionName = AWSSecretsManagerDriver.PROPERTY_PREFIX+"."+ JDBCSecretCacheBuilderProvider.PROPERTY_REGION;
+        Config configProvider = mock(Config.class);
+        String regionName = AWSSecretsManagerDriver.PROPERTY_PREFIX + "."
+                + JDBCSecretCacheBuilderProvider.PROPERTY_REGION;
         when(configProvider.getStringPropertyWithDefault(regionName, null)).thenReturn("");
 
-        AWSSecretsManagerClientBuilder builder = new JDBCSecretCacheBuilderProvider(configProvider).build();
-
-        assertNull(builder.getRegion());
+        try {
+            new JDBCSecretCacheBuilderProvider(configProvider).build().build();
+        } catch (SdkClientException e) {
+            assertTrue(e.getMessage().startsWith("Unable to load region from any of the providers in the chain"));
+        }
     }
 
     @Test
     public void test_settingValidation_emptyEnvironmentVariableIgnored() {
 
-        Config configProvider = PowerMockito.mock(Config.class);
-        PowerMockito.mockStatic(System.class);
+        Config configProvider = mock(Config.class);
 
         String environmentRegionName = JDBCSecretCacheBuilderProvider.REGION_ENVIRONMENT_VARIABLE;
-        when(System.getenv(environmentRegionName)).thenReturn("");
+        environmentVariables.set(environmentRegionName, "");
 
-        AWSSecretsManagerClientBuilder builder = new JDBCSecretCacheBuilderProvider(configProvider).build();
-
-        assertNull(builder.getRegion());
+        try {
+            new JDBCSecretCacheBuilderProvider(configProvider).build().build();
+        } catch (SdkClientException e) {
+            assertTrue(e.getMessage().startsWith("Unable to load region from any of the providers in the chain"));
+        }
     }
-
 
     @Test
     public void test_settingValidation_nullEnvironmentVariableIgnored() {
 
-        Config configProvider = PowerMockito.mock(Config.class);
-        PowerMockito.mockStatic(System.class);
+        Config configProvider = mock(Config.class);
 
         String environmentRegionName = JDBCSecretCacheBuilderProvider.REGION_ENVIRONMENT_VARIABLE;
-        when(System.getenv(environmentRegionName)).thenReturn(null);
+        environmentVariables.clear(environmentRegionName);
 
-        AWSSecretsManagerClientBuilder builder = new JDBCSecretCacheBuilderProvider(configProvider).build();
-
-        assertNull(builder.getRegion());
+        try {
+            new JDBCSecretCacheBuilderProvider(configProvider).build().build();
+        } catch (SdkClientException e) {
+            assertTrue(e.getMessage().startsWith("Unable to load region from any of the providers in the chain"));
+        }
     }
-
-
-
 
     @Test
     public void test_settingValidation_emptyVpcIgnored() {
 
-        Config configProvider = PowerMockito.mock(Config.class);
-        String vpcEndpointUrlName = AWSSecretsManagerDriver.PROPERTY_PREFIX+"."+PROPERTY_VPC_ENDPOINT_URL;
-        String vpcEndpointRegion = AWSSecretsManagerDriver.PROPERTY_PREFIX+"."+PROPERTY_VPC_ENDPOINT_REGION;
+        Config configProvider = mock(Config.class);
+        String vpcEndpointUrlName = AWSSecretsManagerDriver.PROPERTY_PREFIX + "." + PROPERTY_VPC_ENDPOINT_URL;
+        String vpcEndpointRegion = AWSSecretsManagerDriver.PROPERTY_PREFIX + "." + PROPERTY_VPC_ENDPOINT_REGION;
         when(configProvider.getStringPropertyWithDefault(vpcEndpointUrlName, null)).thenReturn("");
         when(configProvider.getStringPropertyWithDefault(vpcEndpointRegion, null)).thenReturn("");
 
-        AWSSecretsManagerClientBuilder builder = new JDBCSecretCacheBuilderProvider(configProvider).build();
-
-        assertNull(builder.getEndpoint());
+        try {
+            SecretsManagerClient client = new JDBCSecretCacheBuilderProvider(configProvider).build().build();
+            assertTrue(client.serviceClientConfiguration().endpointOverride().isEmpty());
+        } catch (SdkClientException e) {
+            assertTrue(e.getMessage().startsWith("Unable to load region from any of the providers in the chain"));
+        }
     }
-
 
     @Test
     public void test_settingValidation_nullVpcIgnored() {
 
-        Config configProvider = PowerMockito.mock(Config.class);
-        String vpcEndpointUrlName = AWSSecretsManagerDriver.PROPERTY_PREFIX+"."+PROPERTY_VPC_ENDPOINT_URL;
-        String vpcEndpointRegion = AWSSecretsManagerDriver.PROPERTY_PREFIX+"."+PROPERTY_VPC_ENDPOINT_REGION;
-        when(configProvider.getStringPropertyWithDefault(vpcEndpointUrlName, null)).thenReturn("");
-        when(configProvider.getStringPropertyWithDefault(vpcEndpointRegion, null)).thenReturn("");
+        Config configProvider = mock(Config.class);
+        String vpcEndpointUrlName = AWSSecretsManagerDriver.PROPERTY_PREFIX + "." + PROPERTY_VPC_ENDPOINT_URL;
+        String vpcEndpointRegion = AWSSecretsManagerDriver.PROPERTY_PREFIX + "." + PROPERTY_VPC_ENDPOINT_REGION;
+        when(configProvider.getStringPropertyWithDefault(vpcEndpointUrlName, null)).thenReturn(null);
+        when(configProvider.getStringPropertyWithDefault(vpcEndpointRegion, null)).thenReturn(null);
 
-        AWSSecretsManagerClientBuilder builder = new JDBCSecretCacheBuilderProvider(configProvider).build();
-
-        assertNull(builder.getEndpoint());
+        try {
+            SecretsManagerClient client = new JDBCSecretCacheBuilderProvider(configProvider).build().build();
+            assertTrue(client.serviceClientConfiguration().endpointOverride().isEmpty());
+        } catch (SdkClientException e) {
+            assertTrue(e.getMessage().startsWith("Unable to load region from any of the providers in the chain"));
+        }
     }
 
 }

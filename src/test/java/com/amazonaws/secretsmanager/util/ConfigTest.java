@@ -12,10 +12,11 @@
  */
 package com.amazonaws.secretsmanager.util;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+
 import java.util.NoSuchElementException;
 import java.util.Properties;
-
-import static org.junit.Assert.*;
 
 import org.junit.Test;
 

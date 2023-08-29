@@ -12,16 +12,6 @@
  */
 package com.amazonaws.secretsmanager.sql;
 
-import com.amazonaws.secretsmanager.util.Config;
-import com.amazonaws.secretsmanager.caching.SecretCache;
-import com.amazonaws.secretsmanager.caching.SecretCacheConfiguration;
-import com.amazonaws.secretsmanager.util.JDBCSecretCacheBuilderProvider;
-import com.amazonaws.services.secretsmanager.AWSSecretsManager;
-import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
-import com.amazonaws.util.StringUtils;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Driver;
@@ -32,6 +22,19 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.logging.Logger;
+
+import com.amazonaws.secretsmanager.caching.SecretCache;
+import com.amazonaws.secretsmanager.caching.SecretCacheConfiguration;
+import com.amazonaws.secretsmanager.util.Config;
+import com.amazonaws.secretsmanager.util.JDBCSecretCacheBuilderProvider;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClientBuilder;
+import software.amazon.awssdk.utils.StringUtils;
 
 /**
  * <p>
@@ -130,6 +133,7 @@ public abstract class AWSSecretsManagerDriver implements Driver {
      *
      * @param cache                                             Secret cache to use to retrieve secrets
      */
+    @SuppressFBWarnings("MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR")
     protected AWSSecretsManagerDriver(SecretCache cache) {
         this.secretCache = cache;
 
@@ -143,7 +147,7 @@ public abstract class AWSSecretsManagerDriver implements Driver {
      *
      * @param builder                                           Builder used to instantiate cache
      */
-    protected AWSSecretsManagerDriver(AWSSecretsManagerClientBuilder builder) {
+    protected AWSSecretsManagerDriver(SecretsManagerClientBuilder builder) {
         this(new SecretCache(builder));
     }
 
@@ -153,7 +157,7 @@ public abstract class AWSSecretsManagerDriver implements Driver {
      *
      * @param client                                            AWS Secrets Manager client to instantiate cache
      */
-    protected AWSSecretsManagerDriver(AWSSecretsManager client) {
+    protected AWSSecretsManagerDriver(SecretsManagerClient client) {
         this(new SecretCache(client));
     }
 
@@ -342,7 +346,7 @@ public abstract class AWSSecretsManagerDriver implements Driver {
                 JsonNode jsonObject = mapper.readTree(secretString);
                 updatedInfo.setProperty("user", jsonObject.get("username").asText());
                 updatedInfo.setProperty("password", jsonObject.get("password").asText());
-            } catch (IOException | NullPointerException e) {
+            } catch (IOException e) {
                 // Most likely to occur in the event that the data is not JSON.
                 // Or the secret's username and/or password fields have been
                 // removed entirely. Either scenario is most often a user error.
@@ -380,7 +384,7 @@ public abstract class AWSSecretsManagerDriver implements Driver {
         } else { // Else, assume this is a secret ID and try to retrieve it
             try {
                 String secretString = secretCache.getSecretString(url);
-                if (StringUtils.isNullOrEmpty(secretString)) {
+                if (StringUtils.isBlank(secretString)) {
                     throw new IllegalArgumentException("URL " + url + " is not a valid URL starting with scheme " +
                             SCHEME + " or a valid retrievable secret ID ");
                 }
@@ -391,7 +395,7 @@ public abstract class AWSSecretsManagerDriver implements Driver {
                 JsonNode dbnameNode = jsonObject.get("dbname");
                 String dbname = dbnameNode == null ? null : dbnameNode.asText();
                 unwrappedUrl = constructUrlFromEndpointPortDatabase(endpoint, port, dbname);
-            } catch (IOException | NullPointerException e) {
+            } catch (IOException e) {
                 // Most likely to occur in the event that the data is not JSON.
                 // Or the secret has been modified and is no longer valid.
                 // Either scenario is most often a user error.
@@ -437,4 +441,3 @@ public abstract class AWSSecretsManagerDriver implements Driver {
         return getWrappedDriver().jdbcCompliant();
     }
 }
-

@@ -12,17 +12,17 @@
  */
 package com.amazonaws.secretsmanager.util;
 
-import com.amazonaws.services.secretsmanager.model.GetSecretValueRequest;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-
 import java.util.Arrays;
 import java.util.LinkedList;
 
+import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest;
+
 /**
- * A class that holds some helper methods for running tests that test classes should inherit from.
+ * A class that holds some helper methods for running tests that test classes
+ * should inherit from.
  */
 public class TestClass {
 
@@ -33,7 +33,7 @@ public class TestClass {
     }
 
     public Object getFieldFrom(Object o, String fieldName) {
-        Class clazz = o.getClass();
+        Class<?> clazz = o.getClass();
         boolean isDone = false;
         while (!isDone) {
             try {
@@ -61,7 +61,7 @@ public class TestClass {
     }
 
     public void setFieldFrom(Object o, String fieldName, Object value) {
-        Class clazz = o.getClass();
+        Class<?> clazz = o.getClass();
         boolean isDone = false;
         while (!isDone) {
             try {
@@ -81,9 +81,9 @@ public class TestClass {
         }
     }
 
-    public Constructor getConstructorWithNArguments(Class clazz, int n) {
-        Constructor[] ctors = clazz.getDeclaredConstructors();
-        Constructor ctor = null;
+    public Constructor<?> getConstructorWithNArguments(Class<?> clazz, int n) {
+        Constructor<?>[] ctors = clazz.getDeclaredConstructors();
+        Constructor<?> ctor = null;
         for (int i = 0; i < ctors.length; i++) {
             ctor = ctors[i];
             if (ctor.getGenericParameterTypes().length == n) {
@@ -93,36 +93,36 @@ public class TestClass {
         return ctor;
     }
 
-    public Object newInstance(Constructor ctor, Object... initargs) {
+    public Object newInstance(Constructor<?> ctor, Object... initargs) {
         try {
             ctor.setAccessible(true);
             return ctor.newInstance(initargs);
         } catch (RuntimeException e) {
             throw e;
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    public Object callConstructorWithArguments(Class clazz, Object... initargs) {
-        Constructor ctor = getConstructorWithNArguments(clazz, initargs.length);
+    public Object callConstructorWithArguments(Class<?> clazz, Object... initargs) {
+        Constructor<?> ctor = getConstructorWithNArguments(clazz, initargs.length);
         return newInstance(ctor, initargs);
     }
 
-    public Object callConstructorWithArguments(int argsOffset, Class clazz, Object... initargs) {
-        Constructor ctor = getConstructorWithNArguments(clazz, initargs.length + argsOffset);
+    public Object callConstructorWithArguments(int argsOffset, Class<?> clazz, Object... initargs) {
+        Constructor<?> ctor = getConstructorWithNArguments(clazz, initargs.length + argsOffset);
         return newInstance(ctor, initargs);
     }
 
     public GetSecretValueRequest requestWithName(String secretName) {
-        return new GetSecretValueRequest().withSecretId(secretName);
+        return GetSecretValueRequest.builder().secretId(secretName).build();
     }
 
     public Object callMethodWithArguments(Object object, String methodName, Object... args) {
         try {
             LinkedList<Method> allMethods = new LinkedList<>();
-            Class clazz = object.getClass();
+            Class<?> clazz = object.getClass();
             while (!clazz.equals(Object.class)) {
                 Method[] methods = clazz.getDeclaredMethods();
                 allMethods.addAll(Arrays.asList(methods));
@@ -140,9 +140,9 @@ public class TestClass {
             }
             correctMethod.setAccessible(true);
             return correctMethod.invoke(object, args);
-        } catch(RuntimeException e) {
+        } catch (RuntimeException e) {
             throw e;
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
@@ -153,31 +153,33 @@ public class TestClass {
     }
 
     public void assertThrows(Class<? extends Exception> exception, throwingRunnable code) {
-        try  {
+        try {
             code.run();
             throw new RuntimeException("Should have thrown a " + exception.getName() + " but threw nothing.");
         } catch (Exception e) {
             if (!exception.isAssignableFrom(e.getClass())) {
                 e.printStackTrace();
-                throw new RuntimeException("Should have thrown a " + exception.getName() + " but threw " + e.getClass().getName());
+                throw new RuntimeException(
+                        "Should have thrown a " + exception.getName() + " but threw " + e.getClass().getName());
             }
         }
     }
 
     public void assertThrows(Exception exception, throwingRunnable code) {
-        try  {
+        try {
             code.run();
             throw new RuntimeException("Should have thrown a " + exception.getMessage() + " but threw nothing.");
         } catch (Exception e) {
             if (!exception.equals(e)) {
                 e.printStackTrace();
-                throw new RuntimeException("Should have thrown a " + exception.getMessage() + " but threw " + e.getClass().getName());
+                throw new RuntimeException(
+                        "Should have thrown a " + exception.getMessage() + " but threw " + e.getClass().getName());
             }
         }
     }
 
     public void assertNotThrows(throwingRunnable code) {
-        try  {
+        try {
             code.run();
         } catch (Exception e) {
             e.printStackTrace();
@@ -185,4 +187,3 @@ public class TestClass {
         }
     }
 }
-

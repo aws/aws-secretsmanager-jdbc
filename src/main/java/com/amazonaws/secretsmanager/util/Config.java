@@ -12,9 +12,8 @@
  */
 package com.amazonaws.secretsmanager.util;
 
-import java.io.InputStream;
 import java.io.IOException;
-
+import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.NoSuchElementException;
 import java.util.Properties;
@@ -138,6 +137,7 @@ public final class Config {
      *
      * @return Config                                           Configuration properties for the subprefix
      */
+    @SuppressWarnings("unchecked")
     public Config getSubconfig(String subprefix) {
         Enumeration<String> propertyNames = (Enumeration<String>) config.propertyNames();
         Properties subconfig = null;
@@ -257,7 +257,7 @@ public final class Config {
      *
      * @throws PropertyException                                If the class name does not exist in this class loader.
      */
-    public Class getClassPropertyWithDefault(String propertyName, Class defaultValue) {
+    public Class<?> getClassPropertyWithDefault(String propertyName, Class<?> defaultValue) {
         String propertyValue = config.getProperty(propertyName);
         if (propertyValue == null) {
             return defaultValue;
@@ -348,7 +348,7 @@ public final class Config {
      * @throws PropertyException                                If the class name does not exist in this class loader.
      * @throws NoSuchElementException                           If the property is not set.
      */
-    public Class getRequiredClassProperty(String propertyName) {
+    public Class<?> getRequiredClassProperty(String propertyName) {
         throwIfPropertyIsNotSet(propertyName);
         return getClassPropertyWithDefault(propertyName, null);
     }

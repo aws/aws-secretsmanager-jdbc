@@ -16,25 +16,13 @@
   <artifactId>aws-secretsmanager-jdbc</artifactId>
   <packaging>jar</packaging>
   <name>AWS Secrets Manager SQL Connection Library</name>
-  <version>1.0.12</version>
+  <version>2.0.0</version>
   <description>The AWS Secrets Manager SQL Connection Library for Java enables Java developers to easily
     connect to SQL databases using secrets stored in AWS Secrets Manager.
   </description>
   <url>https://aws.amazon.com/secrets-manager</url>
 
   <properties>
-    <aws-java-sdk.version>1.12.252</aws-java-sdk.version>
-    <aws-secretsmanager-cache.version>1.0.2</aws-secretsmanager-cache.version>
-    <lombok.version>1.18.24</lombok.version>
-    <jackson.version>2.14.1</jackson.version>
-    <junit.version>4.13.2</junit.version>
-    <mockito.version>1.10.19</mockito.version>
-    <powermock.version>1.7.0</powermock.version>
-    <compiler.plugin.version>3.10.1</compiler.plugin.version>
-    <javadoc.plugin.version>3.4.0</javadoc.plugin.version>
-    <source.plugin.version>3.2.1</source.plugin.version>
-    <checkstyle.plugin.version>3.1.2</checkstyle.plugin.version>
-    <findbugs.plugin.version>3.0.5</findbugs.plugin.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
@@ -76,60 +64,67 @@
     <dependency>
       <groupId>com.amazonaws.secretsmanager</groupId>
       <artifactId>aws-secretsmanager-caching-java</artifactId>
-      <version>${aws-secretsmanager-cache.version}</version>
+      <version>2.0.0</version>
     </dependency>
 
     <dependency>
-      <groupId>com.amazonaws</groupId>
-      <artifactId>aws-java-sdk-secretsmanager</artifactId>
-      <version>${aws-java-sdk.version}</version>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>secretsmanager</artifactId>
+      <version>2.20.93</version>
     </dependency>
 
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>${lombok.version}</version>
+      <version>1.18.28</version>
       <scope>provided</scope>
     </dependency>
 
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>${jackson.version}</version>
+      <version>2.15.2</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.github.spotbugs</groupId>
+      <artifactId>spotbugs-annotations</artifactId>
+      <version>4.7.3</version>
     </dependency>
 
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>${junit.version}</version>
+      <version>4.13.2</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.github.stefanbirkner</groupId>
+      <artifactId>system-rules</artifactId>
+      <version>1.19.0</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.mockito</groupId>
-      <artifactId>mockito-all</artifactId>
-      <version>${mockito.version}</version>
+      <artifactId>mockito-inline</artifactId>
+      <version>3.12.4</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.powermock</groupId>
       <artifactId>powermock-module-junit4</artifactId>
-      <version>${powermock.version}</version>
+      <version>2.0.9</version>
       <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.powermock</groupId>
-      <artifactId>powermock-api-mockito</artifactId>
-      <version>${powermock.version}</version>
+      <artifactId>powermock-api-mockito2</artifactId>
+      <version>2.0.9</version>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jacoco</groupId>
-      <artifactId>org.jacoco.agent</artifactId>
-      <classifier>runtime</classifier>
-      <version>0.8.8</version>
     </dependency>
   </dependencies>
 
@@ -138,17 +133,17 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>${compiler.plugin.version}</version>
+        <version>3.11.0</version>
         <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
+          <source>11</source>
+          <target>11</target>
           <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
-        <version>${source.plugin.version}</version>
+        <version>3.3.0</version>
         <executions>
           <execution>
             <id>attach-sources</id>
@@ -161,7 +156,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>${javadoc.plugin.version}</version>
+        <version>3.5.0</version>
         <executions>
           <execution>
             <id>attach-javadocs</id>
@@ -174,10 +169,9 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>${checkstyle.plugin.version}</version>
+        <version>3.3.0</version>
         <configuration>
           <configLocation>${basedir}/config/checkstyle/checkstyle.xml</configLocation>
-          <encoding>UTF-8</encoding>
           <consoleOutput>true</consoleOutput>
           <failsOnError>true</failsOnError>
           <linkXRef>false</linkXRef>
@@ -194,9 +188,9 @@
         </executions>
       </plugin>
       <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>findbugs-maven-plugin</artifactId>
-        <version>${findbugs.plugin.version}</version>
+        <groupId>com.github.spotbugs</groupId>
+        <artifactId>spotbugs-maven-plugin</artifactId>
+        <version>4.7.3.5</version>
         <configuration>
           <effort>Max</effort>
           <threshold>Low</threshold>
@@ -215,44 +209,21 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.8</version>
+        <version>0.8.10</version>
         <executions>
           <execution>
-            <id>default-instrument</id>
             <goals>
-              <goal>instrument</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>default-restore-instrumented-classes</id>
-            <goals>
-              <goal>restore-instrumented-classes</goal>
+              <goal>prepare-agent</goal>
             </goals>
           </execution>
           <execution>
             <id>report</id>
-            <phase>prepare-package</phase>
+            <phase>test</phase>
             <goals>
               <goal>report</goal>
             </goals>
           </execution>
-          <execution>
-            <id>default-check</id>
-            <goals>
-              <goal>check</goal>
-            </goals>
-          </execution>
         </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.22.2</version>
-        <configuration>
-          <systemPropertyVariables>
-            <jacoco-agent.destfile>target/jacoco.exec</jacoco-agent.destfile>
-          </systemPropertyVariables>
-        </configuration>
       </plugin>
     </plugins>
   </build>
@@ -265,7 +236,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>3.0.1</version>
+            <version>3.1.0</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>

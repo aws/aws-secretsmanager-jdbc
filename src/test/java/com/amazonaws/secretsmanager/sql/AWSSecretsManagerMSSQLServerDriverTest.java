@@ -12,10 +12,13 @@
  */
 package com.amazonaws.secretsmanager.sql;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.sql.SQLException;
 
-import static org.junit.Assert.*;
-
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -23,7 +26,6 @@ import org.mockito.MockitoAnnotations;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.junit.Before;
 
 import com.amazonaws.secretsmanager.caching.SecretCache;
 import com.amazonaws.secretsmanager.util.TestClass;
@@ -103,4 +105,3 @@ public class AWSSecretsManagerMSSQLServerDriverTest extends TestClass {
         assertEquals(getFieldFrom(sut2, "realDriverClass"), sut2.getDefaultDriverClass());
     }
 }
-

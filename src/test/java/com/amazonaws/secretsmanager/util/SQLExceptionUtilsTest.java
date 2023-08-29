@@ -1,21 +1,18 @@
 package com.amazonaws.secretsmanager.util;
 
-import org.junit.Test;
-
-import java.sql.SQLException;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.sql.SQLException;
+
+import org.junit.Test;
 
 public class SQLExceptionUtilsTest {
-
 
     @Test
     public void test_unwrapAndCheckForCode_nullReturnsFalse() {
         assertFalse(SQLExceptionUtils.unwrapAndCheckForCode(null, 1045));
     }
-
 
     @Test
     public void test_unwrapAndCheckForCode_wrappedException_returnsTrue() {
@@ -32,7 +29,6 @@ public class SQLExceptionUtilsTest {
 
         assertFalse(SQLExceptionUtils.unwrapAndCheckForCode(wrapper, 1045));
     }
-
 
     @Test
     public void test_unwrapAndCheckForCode_loopInWrappedExceptions_returnsFalse() {
