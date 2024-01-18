@@ -37,7 +37,14 @@ public final class AWSSecretsManagerPostgreSQLDriver extends AWSSecretsManagerDr
      *
      * See <a href="https://www.postgresql.org/docs/9.6/static/errcodes-appendix.html">PostgreSQL documentation</a>.
      */
-    public static final String ACCESS_DENIED_FOR_USER_USING_PASSWORD_TO_DATABASE = "28P01";
+    public static final String ACCESS_DENIED_FOR_USER_USING_PASSWORD_TO_DATABASE 		= "28P01";
+
+    /**
+     * When Alternating User rotation occurs than RDS Proxy (if it is in place) returns the following exception:
+     * 		org.postgresql.util.PSQLException: FATAL: This RDS proxy has no credentials for the role eps_np_clone. Check the credentials for this role and try again.
+     * 		sqlState: 28000 - errorCode: 0
+     */
+    public static final String ACCESS_DENIED_FOR_INVALID_AUTHORIZATION_SPECIFICATION 	= "28000";
 
     /**
      * Set to postgresql.
@@ -106,7 +113,7 @@ public final class AWSSecretsManagerPostgreSQLDriver extends AWSSecretsManagerDr
         if (e instanceof SQLException) {
             SQLException sqle = (SQLException) e;
             String sqlState = sqle.getSQLState();
-            return sqlState.equals(ACCESS_DENIED_FOR_USER_USING_PASSWORD_TO_DATABASE);
+            return sqlState.equals(ACCESS_DENIED_FOR_USER_USING_PASSWORD_TO_DATABASE) || sqlState.equals(ACCESS_DENIED_FOR_INVALID_AUTHORIZATION_SPECIFICATION);
         }
         return false;
     }
