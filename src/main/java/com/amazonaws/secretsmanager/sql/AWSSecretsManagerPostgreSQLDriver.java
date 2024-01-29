@@ -40,6 +40,13 @@ public final class AWSSecretsManagerPostgreSQLDriver extends AWSSecretsManagerDr
     public static final String ACCESS_DENIED_FOR_USER_USING_PASSWORD_TO_DATABASE = "28P01";
 
     /**
+     * The error code returned by RDS Proxy when the secret is rotated in alternating user mode.
+     *
+     * See <a href="https://www.postgresql.org/docs/current/errcodes-appendix.html">PosgreSQL documentation</a>.
+     */
+    public static final String ACCESS_DENIED_FOR_INVALID_AUTHORIZATION_SPECIFICATION = "28000";
+
+    /**
      * Set to postgresql.
      */
     public static final String SUBPREFIX = "postgresql";
@@ -106,7 +113,7 @@ public final class AWSSecretsManagerPostgreSQLDriver extends AWSSecretsManagerDr
         if (e instanceof SQLException) {
             SQLException sqle = (SQLException) e;
             String sqlState = sqle.getSQLState();
-            return sqlState.equals(ACCESS_DENIED_FOR_USER_USING_PASSWORD_TO_DATABASE);
+            return sqlState.equals(ACCESS_DENIED_FOR_USER_USING_PASSWORD_TO_DATABASE) || sqlState.equals(ACCESS_DENIED_FOR_INVALID_AUTHORIZATION_SPECIFICATION);
         }
         return false;
     }
