@@ -75,6 +75,12 @@ c3p0.jdbcUrl=jdbc-secretsmanager:mysql://example.com:3306
 # c3p0.user=secretId
 # c3p0.driverClass=com.amazonaws.secretsmanager.sql.AWSSecretsManagerMSSQLServerDriver
 # c3p0.jdbcUrl=jdbc-secretsmanager:sqlserver://example.com:1433
+
+# Redshift example
+# c3p0.user=secretId
+# c3p0.driverClass=com.amazonaws.secretsmanager.sql.AWSSecretsManagerRedshiftDriver
+# c3p0.jdbcUrl=jdbc-secretsmanager:redshift://example.com:5439
+
 ```
 
 The only changes that need to happen in the c3p0 config are to:
