@@ -139,9 +139,10 @@ public class AWSSecretsManagerDriverTest extends TestClass {
 
     @Test
     public void test_init_works_realDriverFromConfig() {
-        System.setProperty("drivers.dummy.realDriverClass", "some.other.class");
+        String driver = "com.amazonaws.secretsmanager.sql.EmptyDriver";
+        System.setProperty("drivers.dummy.realDriverClass", driver);
         AWSSecretsManagerDummyDriver sut2 = new AWSSecretsManagerDummyDriver(cache);
-        assertEquals(getFieldFrom(sut2, "realDriverClass"), "some.other.class");
+        assertEquals(getFieldFrom(sut2, "realDriverClass"), driver);
     }
 
     /*******************************************************************************************************************

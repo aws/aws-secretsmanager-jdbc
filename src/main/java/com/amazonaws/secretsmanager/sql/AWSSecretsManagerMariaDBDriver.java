@@ -46,6 +46,11 @@ public final class AWSSecretsManagerMariaDBDriver extends AWSSecretsManagerDrive
      */
     public static final String SUBPREFIX = "mariadb";
 
+    /**
+     * Default driver class to use.
+     */
+    public static final String DEFAULT_DRIVER = "org.mariadb.jdbc.Driver";
+
     static {
         AWSSecretsManagerDriver.register(new AWSSecretsManagerMariaDBDriver());
     }
@@ -122,6 +127,6 @@ public final class AWSSecretsManagerMariaDBDriver extends AWSSecretsManagerDrive
 
     @Override
     public String getDefaultDriverClass() {
-        return "org.mariadb.jdbc.Driver";
+        return DEFAULT_DRIVER;
     }
 }

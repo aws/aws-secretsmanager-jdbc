@@ -32,7 +32,7 @@ import com.amazonaws.secretsmanager.util.TestClass;
  * Tests for the MySQL Driver.
  */
 @RunWith(PowerMockRunner.class)
-@SuppressStaticInitializationFor("com.amazonaws.secretsmanager.sql.AWSSecretsManagerMySQLDriver")
+@SuppressStaticInitializationFor({"com.amazonaws.secretsmanager.sql.AWSSecretsManagerMySQLDriver","com.amazonaws.secretsmanager.sql.*"})
 @PowerMockIgnore("jdk.internal.reflect.*")
 public class AWSSecretsManagerMySQLDriverTest extends TestClass {
 
@@ -99,8 +99,7 @@ public class AWSSecretsManagerMySQLDriverTest extends TestClass {
     @Test
     public void test_getDefaultDriverClass() {
         System.clearProperty("drivers.mysql.realDriverClass");
-        AWSSecretsManagerMySQLDriver sut2 = new AWSSecretsManagerMySQLDriver(cache);
-        assertEquals(getFieldFrom(sut2, "realDriverClass"), sut2.getDefaultDriverClass());
+        assertThrows(IllegalStateException.class, "Could not load real driver with name, \"" + AWSSecretsManagerMySQLDriver.getStaticDefaultDriverClass() + "\".", () -> new AWSSecretsManagerMySQLDriver(cache));
     }
 }
 

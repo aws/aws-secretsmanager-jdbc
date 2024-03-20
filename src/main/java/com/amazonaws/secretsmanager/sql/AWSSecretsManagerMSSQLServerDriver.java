@@ -46,6 +46,11 @@ public final class AWSSecretsManagerMSSQLServerDriver extends AWSSecretsManagerD
      */
     public static final String SUBPREFIX = "sqlserver";
 
+    /**
+     * Default driver class to use.
+     */
+    public static final String DEFAULT_DRIVER = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+
     static {
         AWSSecretsManagerDriver.register(new AWSSecretsManagerMSSQLServerDriver());
     }
@@ -127,7 +132,7 @@ public final class AWSSecretsManagerMSSQLServerDriver extends AWSSecretsManagerD
 
     @Override
     public String getDefaultDriverClass() {
-        return "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+        return DEFAULT_DRIVER;
     }
 }
 

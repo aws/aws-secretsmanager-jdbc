@@ -43,6 +43,11 @@ public final class AWSSecretsManagerRedshiftDriver extends AWSSecretsManagerDriv
 
     public static final String SUBPREFIX = "redshift";
 
+    /**
+     * Default driver class to use.
+     */
+    public static final String DEFAULT_DRIVER = "com.amazon.redshift.Driver";
+
     static {
         AWSSecretsManagerDriver.register(new AWSSecretsManagerRedshiftDriver());
     }
@@ -129,6 +134,6 @@ public final class AWSSecretsManagerRedshiftDriver extends AWSSecretsManagerDriv
 
     @Override
     public String getDefaultDriverClass() {
-        return "com.amazon.redshift.Driver";
+        return DEFAULT_DRIVER;
     }
 }

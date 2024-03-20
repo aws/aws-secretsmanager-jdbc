@@ -32,7 +32,7 @@ import com.amazonaws.secretsmanager.util.TestClass;
  * Tests for the MariaDB Driver.
  */
 @RunWith(PowerMockRunner.class)
-@SuppressStaticInitializationFor("com.amazonaws.secretsmanager.sql.AWSSecretsManagerMariaDBDriver")
+@SuppressStaticInitializationFor({"com.amazonaws.secretsmanager.sql.AWSSecretsManagerMariaDBDriver","com.amazonaws.secretsmanager.sql.*"})
 @PowerMockIgnore("jdk.internal.reflect.*")
 public class AWSSecretsManagerMariaDBDriverTest extends TestClass {
 
@@ -99,8 +99,7 @@ public class AWSSecretsManagerMariaDBDriverTest extends TestClass {
     @Test
     public void test_getDefaultDriverClass() {
         System.clearProperty("drivers.mariadb.realDriverClass");
-        AWSSecretsManagerMariaDBDriver sut2 = new AWSSecretsManagerMariaDBDriver(cache);
-        assertEquals(getFieldFrom(sut2, "realDriverClass"), sut2.getDefaultDriverClass());
+        assertThrows(IllegalStateException.class, "Could not load real driver with name, \"" + AWSSecretsManagerMariaDBDriver.DEFAULT_DRIVER + "\".", () -> new AWSSecretsManagerMariaDBDriver(cache));
     }
 }
 

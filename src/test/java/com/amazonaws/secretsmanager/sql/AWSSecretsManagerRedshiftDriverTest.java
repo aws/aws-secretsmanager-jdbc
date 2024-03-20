@@ -32,7 +32,7 @@ import com.amazonaws.secretsmanager.util.TestClass;
  * Tests for the Redshift Driver.
  */
 @RunWith(PowerMockRunner.class)
-@SuppressStaticInitializationFor("com.amazonaws.secretsmanager.sql.AWSSecretsManagerRedshiftDriver")
+@SuppressStaticInitializationFor({"com.amazonaws.secretsmanager.sql.AWSSecretsManagerRedshiftDriver","com.amazonaws.secretsmanager.sql.*"})
 @PowerMockIgnore("jdk.internal.reflect.*")
 public class AWSSecretsManagerRedshiftDriverTest extends TestClass {
 
@@ -99,7 +99,6 @@ public class AWSSecretsManagerRedshiftDriverTest extends TestClass {
     @Test
     public void test_getDefaultDriverClass() {
         System.clearProperty("drivers.redshift.realDriverClass");
-        AWSSecretsManagerRedshiftDriver sut2 = new AWSSecretsManagerRedshiftDriver(cache);
-        assertEquals(getFieldFrom(sut2, "realDriverClass"), sut2.getDefaultDriverClass());
+        assertThrows(IllegalStateException.class, "Could not load real driver with name, \"" + AWSSecretsManagerRedshiftDriver.DEFAULT_DRIVER + "\".", () -> new AWSSecretsManagerRedshiftDriver(cache));
     }
 }
