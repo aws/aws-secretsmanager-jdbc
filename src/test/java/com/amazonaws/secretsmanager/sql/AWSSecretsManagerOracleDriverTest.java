@@ -104,6 +104,30 @@ public class AWSSecretsManagerOracleDriverTest extends TestClass {
     }
 
     @Test
+    public void test_enforceSSL_WithTrueSSLMode() {
+        String url = sut.enforceSSL("jdbc:oracle:thin:@//test-endpoint:1234/dev", "true");
+        assertEquals(url, "jdbc:oracle:thin:@tcps://test-endpoint:1234/dev");
+    }
+
+    @Test
+    public void test_enforceSSLNullPort_WithTrueSSLModeUpperCas() {
+        String url = sut.enforceSSL("jdbc:oracle:thin:@//test-endpoint/dev", "TRUE");
+        assertEquals(url, "jdbc:oracle:thin:@tcps://test-endpoint/dev");
+    }
+
+    @Test
+    public void test_enforceSSLNullDatabase_WithTrueSSLMode() {
+        String url = sut.enforceSSL("jdbc:oracle:thin:@//test-endpoint:1234", "TRue");
+        assertEquals(url, "jdbc:oracle:thin:@tcps://test-endpoint:1234");
+    }
+
+    @Test
+    public void test_enforceSSL_WithNonBooleanSSLMode() {
+        String url = sut.enforceSSL("jdbc:oracle:thin:@//test-endpoint:1234/dev", "verify-full");
+        assertEquals(url, "jdbc:oracle:thin:@//test-endpoint:1234/dev");
+    }
+
+    @Test
     public void test_getDefaultDriverClass() {
         System.clearProperty("drivers.oracle.realDriverClass");
         AWSSecretsManagerOracleDriver sut2 = new AWSSecretsManagerOracleDriver(cache);

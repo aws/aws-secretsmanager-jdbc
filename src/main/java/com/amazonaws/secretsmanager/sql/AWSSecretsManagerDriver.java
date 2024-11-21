@@ -108,6 +108,11 @@ public abstract class AWSSecretsManagerDriver implements Driver {
      */ 
     public static final String INVALID_SECRET_STRING_JSON = "Could not parse SecretString JSON";
 
+    /**
+    * Logger for the AWSSecretsManagerDriver class.
+    */
+    private static final Logger logger = Logger.getLogger(AWSSecretsManagerDriver.class.getName());
+
     private SecretCache secretCache;
 
     private String realDriverClass;
@@ -320,6 +325,32 @@ public abstract class AWSSecretsManagerDriver implements Driver {
     public abstract String getDefaultDriverClass();
 
     /**
+     * Enforce SSL on the given database URL based on the specified SSL mode.
+     * This method is called when the <code>connect</code> method is called with a secret ID instead of a URL.
+     *
+     * @param url                                               The database URL to enforce SSL on.
+     * @param sslMode                                           The SSL mode to enforce.
+     *
+     * @return String                                           The database URL with SSL enforced.
+     */
+    public abstract String enforceSSL(String url, String sslMode);
+
+    private String getSSLConfig(JsonNode jsonObject) {
+        JsonNode sslNode = jsonObject.get("ssl");
+
+        if(sslNode == null) {
+            return "true";
+        }
+
+        if (sslNode.isBoolean()) {
+            return sslNode.asBoolean() ? "true" : "false";
+        } else if (sslNode.isTextual()) {
+            return sslNode.asText();
+        }
+        return "true";
+    }
+
+    /**
      * Calls the real driver's <code>connect</code> method using credentials from a secret stored in AWS Secrets
      * Manager.
      *
@@ -329,6 +360,7 @@ public abstract class AWSSecretsManagerDriver implements Driver {
      *                                                          credentials retrieved from Secrets Manager.
      * @param credentialsSecretId                               The friendly name or ARN of the secret that stores the
      *                                                          login credentials.
+     * @param isSecretId                                        A flag indicating if the connection uses a secret ID.
      *
      * @return Connection                                       A database connection.
      *
@@ -336,9 +368,10 @@ public abstract class AWSSecretsManagerDriver implements Driver {
      *                                                          database.
      * @throws InterruptedException                             If there was an interruption during secret refresh.
      */
-    private Connection connectWithSecret(String unwrappedUrl, Properties info, String credentialsSecretId)
+    private Connection connectWithSecret(String unwrappedUrl, Properties info, String credentialsSecretId, boolean isSecretId)
             throws SQLException, InterruptedException {
         int retryCount = 0;
+        String sslMode = null;
         while (retryCount++ <= MAX_RETRY) {
             String secretString = secretCache.getSecretString(credentialsSecretId);
             Properties updatedInfo = new Properties(info);
@@ -346,11 +379,21 @@ public abstract class AWSSecretsManagerDriver implements Driver {
                 JsonNode jsonObject = mapper.readTree(secretString);
                 updatedInfo.setProperty("user", jsonObject.get("username").asText());
                 updatedInfo.setProperty("password", jsonObject.get("password").asText());
+                sslMode = isSecretId ? getSSLConfig(jsonObject) : null;
             } catch (IOException e) {
                 // Most likely to occur in the event that the data is not JSON.
                 // Or the secret's username and/or password fields have been
                 // removed entirely. Either scenario is most often a user error.
                 throw new RuntimeException(INVALID_SECRET_STRING_JSON);
+            }
+
+            if (sslMode != null && !"false".equalsIgnoreCase(sslMode)) {
+                try {
+                    return getWrappedDriver().connect(enforceSSL(unwrappedUrl, sslMode), updatedInfo);
+                } catch (SQLException e) {
+                    // If SSL connection fails, fall back to non-SSL
+                    logger.warning("SSL connection failed. Falling back to non-SSL connection. Error: " + e.getMessage());
+                }
             }
 
             try {
@@ -379,6 +422,7 @@ public abstract class AWSSecretsManagerDriver implements Driver {
         }
 
         String unwrappedUrl = "";
+        boolean isSecretId = false;
         if (url.startsWith(SCHEME)) { // If this is a URL in the correct scheme, unwrap it
             unwrappedUrl = unwrapUrl(url);
         } else { // Else, assume this is a secret ID and try to retrieve it
@@ -395,6 +439,7 @@ public abstract class AWSSecretsManagerDriver implements Driver {
                 JsonNode dbnameNode = jsonObject.get("dbname");
                 String dbname = dbnameNode == null ? null : dbnameNode.asText();
                 unwrappedUrl = constructUrlFromEndpointPortDatabase(endpoint, port, dbname);
+                isSecretId = true;
             } catch (IOException e) {
                 // Most likely to occur in the event that the data is not JSON.
                 // Or the secret has been modified and is no longer valid.
@@ -406,7 +451,7 @@ public abstract class AWSSecretsManagerDriver implements Driver {
         if (info != null && info.getProperty("user") != null) {
             String credentialsSecretId = info.getProperty("user");
             try {
-                return connectWithSecret(unwrappedUrl, info, credentialsSecretId);
+                return connectWithSecret(unwrappedUrl, info, credentialsSecretId, isSecretId);
             } catch (InterruptedException e) {
                 // User driven exception. Throw a runtime exception.
                 throw new RuntimeException(e);

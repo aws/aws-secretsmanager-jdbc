@@ -23,3 +23,5 @@ jacoco.exec
 
 # VS Code
 .vscode/
+
+.java-version

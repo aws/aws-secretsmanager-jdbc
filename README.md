@@ -115,3 +115,22 @@ drivers.region= #The region to use.
 ```
 
 If this driver is running on EKS, the library could pick up the credentials of the node it is running on instead of the service account role ([issue](https://github.com/aws/aws-secretsmanager-jdbc/issues/55)). To address this, add version `2` of `software.amazon.awssdk:sts` to your Gradle/Maven project file as a dependency.
+
+## SSL Connections
+
+We support SSL connections when the AWS Secrets Manager JDBC driver connects with Amazon RDS MySQL, MariaDB, SQL Server, PostgreSQL, and Redshift. The code for all RDS databases (except Oracle and DB2) now connects to the database using SSL by default for new connections.
+
+To specify a different SSL mode instead of the default, add the following key-value pair in your secret JSON:
+
+```
+{
+...
+“ssl”: “<ssl mode>”
+}
+```
+
+For more details on enabling SSL connection for Oracle, see [Adding the SSL option](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.Oracle.Options.SSL.OptionGroup.html).
+
+For DB2, see [Using SSL/TLS with an Amazon RDS for Db2 DB instance](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Db2.Concepts.SSL.html).
+
+For SSL modes that require the Amazon RDS root CA certificate, see [Setting up an SSL connection over JDBC](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Appendix.Oracle.Options.SSL.JDBC.html).

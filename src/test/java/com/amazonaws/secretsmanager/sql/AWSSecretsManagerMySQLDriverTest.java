@@ -99,6 +99,36 @@ public class AWSSecretsManagerMySQLDriverTest extends TestClass {
     }
 
     @Test
+    public void test_enforceSSL_WithDisabledMode() {
+        String url = sut.enforceSSL("jdbc:mysql://test-endpoint:1234/dev", "DISABLED");
+        assertEquals(url, "jdbc:mysql://test-endpoint:1234/dev");
+    }
+
+    @Test
+    public void test_enforceSSLNullPort_withVerifyCAMode() {
+        String url = sut.enforceSSL("jdbc:mysql://test-endpoint/dev", "VERIFY_CA");
+        assertEquals(url, "jdbc:mysql://test-endpoint/dev?sslMode=VERIFY_CA");
+    }
+
+    @Test
+    public void test_enforceSSLNullDatabase_withVerifyIdentityMode() {
+        String url = sut.enforceSSL("jdbc:mysql://test-endpoint:1234", "VERIFY_IDENTITY");
+        assertEquals(url, "jdbc:mysql://test-endpoint:1234?sslMode=VERIFY_IDENTITY");
+    }
+
+    @Test
+    public void test_enforceSSL_WithRequiredSSLMode() {
+        String url = sut.enforceSSL("jdbc:mysql://test-endpoint:1234/dev", "REQUIRED");
+        assertEquals(url, "jdbc:mysql://test-endpoint:1234/dev?sslMode=REQUIRED");
+    }
+
+    @Test
+    public void test_enforceSSL_WithDefaultSSLMode() {
+        String url = sut.enforceSSL("jdbc:mysql://test-endpoint:1234/dev", "true");
+        assertEquals(url, "jdbc:mysql://test-endpoint:1234/dev?sslMode=PREFERRED");
+    }
+
+    @Test
     public void test_getDefaultDriverClass() {
         System.clearProperty("drivers.mysql.realDriverClass");
         AWSSecretsManagerMySQLDriver sut2 = new AWSSecretsManagerMySQLDriver(cache);

@@ -99,6 +99,30 @@ public class AWSSecretsManagerMariaDBDriverTest extends TestClass {
     }
 
     @Test
+    public void test_enforceSSL_WithDisableMode() {
+        String url = sut.enforceSSL("jdbc:mariadb://test-endpoint:1234/dev", "disable");
+        assertEquals(url, "jdbc:mariadb://test-endpoint:1234/dev");
+    }
+
+    @Test
+    public void test_enforceSSLNullPort_withVerifyFullMode() {
+        String url = sut.enforceSSL("jdbc:mariadb://test-endpoint/dev", "verify-full");
+        assertEquals(url, "jdbc:mariadb://test-endpoint/dev?sslMode=verify-full");
+    }
+
+    @Test
+    public void test_enforceSSLNullDatabase_withVerifyCaMode() {
+        String url = sut.enforceSSL("jdbc:mariadb://test-endpoint:1234", "verify-ca");
+        assertEquals(url, "jdbc:mariadb://test-endpoint:1234?sslMode=verify-ca");
+    }
+
+    @Test
+    public void test_enforceSSL_WithDefaultSSLMode() {
+        String url = sut.enforceSSL("jdbc:mariadb://test-endpoint:1234/dev", "true");
+        assertEquals(url, "jdbc:mariadb://test-endpoint:1234/dev?sslMode=trust");
+    }
+
+    @Test
     public void test_getDefaultDriverClass() {
         System.clearProperty("drivers.mariadb.realDriverClass");
         AWSSecretsManagerMariaDBDriver sut2 = new AWSSecretsManagerMariaDBDriver(cache);

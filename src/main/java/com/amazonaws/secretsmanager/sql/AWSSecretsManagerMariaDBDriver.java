@@ -15,6 +15,7 @@ package com.amazonaws.secretsmanager.sql;
 import com.amazonaws.secretsmanager.caching.SecretCache;
 import com.amazonaws.secretsmanager.caching.SecretCacheConfiguration;
 import com.amazonaws.secretsmanager.util.SQLExceptionUtils;
+import com.amazonaws.secretsmanager.util.URLBuilder;
 
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClientBuilder;
@@ -117,6 +118,22 @@ public final class AWSSecretsManagerMariaDBDriver extends AWSSecretsManagerDrive
         }
         if (StringUtils.isNotBlank(dbname)) {
             url += "/" + dbname;
+        }
+        return url;
+    }
+
+    @Override
+    public String enforceSSL(String url, String sslMode) {
+        URLBuilder builder = new URLBuilder(url);
+        switch(sslMode) {
+            case "disable":
+                break;
+            case "trust":
+            case "verify-full":
+            case "verify-ca":
+                return builder.appendParameter("sslMode", sslMode, !url.contains("?")).build();
+            default:
+                return builder.appendParameter("sslMode", "trust", !url.contains("?")).build();
         }
         return url;
     }
