@@ -50,6 +50,11 @@ public final class AWSSecretsManagerPostgreSQLDriver extends AWSSecretsManagerDr
      */
     public static final String SUBPREFIX = "postgresql";
 
+    /**
+     * Default driver class to use.
+     */
+    public static final String DEFAULT_DRIVER = "org.postgresql.Driver";
+
     static {
         AWSSecretsManagerDriver.register(new AWSSecretsManagerPostgreSQLDriver());
     }
@@ -134,7 +139,7 @@ public final class AWSSecretsManagerPostgreSQLDriver extends AWSSecretsManagerDr
 
     @Override
     public String getDefaultDriverClass() {
-        return "org.postgresql.Driver";
+        return DEFAULT_DRIVER;
     }
 }
 

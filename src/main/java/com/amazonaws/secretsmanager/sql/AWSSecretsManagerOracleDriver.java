@@ -61,6 +61,11 @@ public final class AWSSecretsManagerOracleDriver extends AWSSecretsManagerDriver
      */
     public static final String SUBPREFIX = "oracle";
 
+    /**
+     * Default driver class to use.
+     */
+    public static final String DEFAULT_DRIVER = "oracle.jdbc.OracleDriver";
+
     static {
         AWSSecretsManagerDriver.register(new AWSSecretsManagerOracleDriver());
     }
@@ -144,7 +149,7 @@ public final class AWSSecretsManagerOracleDriver extends AWSSecretsManagerDriver
 
     @Override
     public String getDefaultDriverClass() {
-        return "oracle.jdbc.OracleDriver";
+        return DEFAULT_DRIVER;
     }
 }
 

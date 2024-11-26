@@ -176,6 +176,18 @@ public class TestClass {
         }
     }
 
+    public void assertThrows(Class<? extends Exception> exception, String message, throwingRunnable code) {
+        try  {
+            code.run();
+            throw new RuntimeException("Should have thrown a " + exception.getName() + " but threw nothing.");
+        } catch (Exception e) {
+            if (!exception.isAssignableFrom(e.getClass()) && !message.equals(e.getMessage())) {
+                e.printStackTrace();
+                throw new RuntimeException("Should have thrown a " + exception.getName() + " with message " + message + " but threw " + e.getClass().getName() + " with message " + e.getMessage());
+            }
+        }
+    }
+
     public void assertNotThrows(throwingRunnable code) {
         try  {
             code.run();
