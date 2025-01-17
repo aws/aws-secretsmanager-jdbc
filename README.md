@@ -50,54 +50,48 @@ To use the latest build (pre-release), don't forget to enable the download of sn
 
 ### Usage Example
 We provide database drivers that intercept calls to real database drivers and swap out secret IDs for actual login credentials.
-This prevents hard-coding database credentials into your application code. This can be integrated into your app through a few
-configuration file changes. Here is an example for making this work with your c3p0 config:
+This prevents hard-coding database credentials into your application code. 
 
-```properties
-# c3p0.properties
-
-# MySQL example
-c3p0.user=secretId
-c3p0.driverClass=com.amazonaws.secretsmanager.sql.AWSSecretsManagerMySQLDriver
-c3p0.jdbcUrl=jdbc-secretsmanager:mysql://example.com:3306
-
-# PostgreSQL example
-# c3p0.user=secretId
-# c3p0.driverClass=com.amazonaws.secretsmanager.sql.AWSSecretsManagerPostgreSQLDriver
-# c3p0.jdbcUrl=jdbc-secretsmanager:postgresql://example.com:5432/database
-
-# Oracle example
-# c3p0.user=secretId
-# c3p0.driverClass=com.amazonaws.secretsmanager.sql.AWSSecretsManagerOracleDriver
-# c3p0.jdbcUrl=jdbc-secretsmanager:oracle:thin:@example.com:1521/ORCL
-
-# MSSQLServer example
-# c3p0.user=secretId
-# c3p0.driverClass=com.amazonaws.secretsmanager.sql.AWSSecretsManagerMSSQLServerDriver
-# c3p0.jdbcUrl=jdbc-secretsmanager:sqlserver://example.com:1433
-
-# Redshift example
-# c3p0.user=secretId
-# c3p0.driverClass=com.amazonaws.secretsmanager.sql.AWSSecretsManagerRedshiftDriver
-# c3p0.jdbcUrl=jdbc-secretsmanager:redshift://example.com:5439
 
 ```
+// Load the JDBC driver
+Class.forName( "com.amazonaws.secretsmanager.sql.AWSSecretsManagerPostgreSQLDriver" ).newInstance();
 
-The only changes that need to happen in the c3p0 config are to:
+// Retrieve the connection info from the secret using the secret ARN
+String URL = "secretId";
 
-* change the jdbc url to one that our driver will intercept (starting with jdbc-secretsmanager),
-* change the c3p0 user to be the secret ID of the secret in secrets manager that has the username and password,
-* and change the `driverClass` to be our driver wrapper.
+// Populate the user property with the secret ARN to retrieve user and password from the secret
+Properties info = new Properties( );
+info.put( "user", "secretId" );
 
-The secret being used should be in the JSON format we use for our rotation lambdas for RDS databases. E.g:
+// Establish the connection
+conn = DriverManager.getConnection(URL, info);
+```
 
+To specify a custom endpoint and port instead of resolving from the secret, use the jdbc-secretsmanager prefix with your database information.
+
+```
+// Options to resolve the connection information
+
+// Set url to secret arn to resolve endpoint and port from secret
+String URL = "secretId";
+
+// Use jdbc-secretsmanager prefix to specify endpoint and port instead of resolving from secret
+String URL = "jdbc-secretsmanager:postgresql://example.com:5432/database";
+```
+
+The secret being used should be in the correct JSON format, reference [documentation](https://docs.aws.amazon.com/secretsmanager/latest/userguide/reference_secret_json_structure) for more details. E.g:
 ```json
 {
-	"username": "user",
-	"password": "pass",
-	...
+  "host": "<host name>",
+  "username": "<username>",
+  "password": "<password>",
+  "dbname": "<database name>",
+  "port": "<port number>",
 }
 ```
+
+We offer support for a variety of drivers, reference [documentation](https://docs.aws.amazon.com/secretsmanager/latest/userguide/retrieving-secrets_jdbc) for more details.
 
 ## Credentials
 
