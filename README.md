@@ -49,8 +49,11 @@ To use the latest build (pre-release), don't forget to enable the download of sn
 ```
 
 ### Usage Example
-We provide database drivers that intercept calls to real database drivers and swap out secret IDs for actual login credentials.
-This prevents hard-coding database credentials into your application code. 
+We provide database drivers that intercept calls to real database drivers and replace secret IDs with actual login credentials.
+This prevents hard-coding database credentials into your application code.
+
+
+The following is an example which uses the secret to resolve both the endpoint and the login credentials.
 
 
 ```
@@ -80,7 +83,7 @@ String URL = "secretId";
 String URL = "jdbc-secretsmanager:postgresql://example.com:5432/database";
 ```
 
-The secret being used should be in the correct JSON format, reference [documentation](https://docs.aws.amazon.com/secretsmanager/latest/userguide/reference_secret_json_structure) for more details. E.g:
+The secret should be in the correct JSON format. For more information, see the [AWS Secrets Manager documentation](https://docs.aws.amazon.com/secretsmanager/latest/userguide/reference_secret_json_structure). For example:
 ```json
 {
   "host": "<host name>",
@@ -91,7 +94,8 @@ The secret being used should be in the correct JSON format, reference [documenta
 }
 ```
 
-We offer support for a variety of drivers, reference [documentation](https://docs.aws.amazon.com/secretsmanager/latest/userguide/retrieving-secrets_jdbc) for more details.
+We support a variety of drivers. For more information, see the [AWS Secrets Manager JDBC documentation](https://docs.aws.amazon.com/secretsmanager/latest/userguide/retrieving-secrets_jdbc).
+
 
 ## Credentials
 
