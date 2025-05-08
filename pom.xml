@@ -239,7 +239,7 @@
             <configuration>
               <shadedArtifactAttached>true</shadedArtifactAttached>
               <shadedClassifierName>shaded</shadedClassifierName>
-              <createDeependencyReducedPom>false</createDeependencyReducedPom>
+              <createDependencyReducedPom>false</createDependencyReducedPom>
               <transformers>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
