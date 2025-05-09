@@ -16,7 +16,11 @@ This library is licensed under the Apache 2.0 License.
 
 ## Building from Source
 
-After you've downloaded the code from GitHub, you can build it using Maven. To disable GPG signing in the build, use this command: `mvn clean install -Dgpg.skip=true`
+After you've downloaded the code from GitHub, you can build it using Maven. 
+* To disable GPG signing in the build, use this command: `mvn clean install -Dgpg.skip=true`
+* To build the default (non-shaded) JAR, use this command: `mvn clean install`
+* To build the shaded (uber) JAR with all dependencies included, use this command: `mvn clean install -Pshade`
+The shaded JAR will be generated in the `target/` directory with the `-shaded` classifier, e.g.: `target/aws-secretsmanager-jdbc-2.0.2-shaded.jar`
 
 ## Usage
 The recommended way to use the SQL Connection Library is to consume it from Maven.  The latest released version can be found at: https://mvnrepository.com/artifact/com.amazonaws.secretsmanager/aws-secretsmanager-jdbc
