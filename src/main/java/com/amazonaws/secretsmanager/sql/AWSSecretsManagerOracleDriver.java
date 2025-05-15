@@ -12,11 +12,9 @@
  */
 package com.amazonaws.secretsmanager.sql;
 
-import java.sql.SQLException;
-
 import com.amazonaws.secretsmanager.caching.SecretCache;
 import com.amazonaws.secretsmanager.caching.SecretCacheConfiguration;
-
+import java.sql.SQLException;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClientBuilder;
 import software.amazon.awssdk.utils.StringUtils;
@@ -125,8 +123,8 @@ public final class AWSSecretsManagerOracleDriver extends AWSSecretsManagerDriver
             SQLException sqle = (SQLException) e;
             int errorCode = sqle.getErrorCode();
             return errorCode == USER_CREDENTIALS_DO_NOT_MATCH
-                || errorCode == INVALID_USERNAME_OR_PASSWORD
-                || errorCode == INCORRECT_USER_PASSWORD;
+                    || errorCode == INVALID_USERNAME_OR_PASSWORD
+                    || errorCode == INCORRECT_USER_PASSWORD;
         }
         return false;
     }

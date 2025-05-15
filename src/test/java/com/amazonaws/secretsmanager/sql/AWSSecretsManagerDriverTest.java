@@ -17,11 +17,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import com.amazonaws.secretsmanager.caching.SecretCache;
+import com.amazonaws.secretsmanager.caching.SecretCacheConfiguration;
+import com.amazonaws.secretsmanager.util.TestClass;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,11 +36,6 @@ import org.mockito.stubbing.Answer;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
 import org.powermock.modules.junit4.PowerMockRunner;
-
-import com.amazonaws.secretsmanager.caching.SecretCache;
-import com.amazonaws.secretsmanager.caching.SecretCacheConfiguration;
-import com.amazonaws.secretsmanager.util.TestClass;
-
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClientBuilder;
 
@@ -76,7 +73,7 @@ public class AWSSecretsManagerDriverTest extends TestClass {
             public String answer(InvocationOnMock invocation) throws Throwable {
                 Object[] arguments = invocation.getArguments();
 
-                if (arguments != null && arguments.length > 0 && arguments[0] != null){
+                if (arguments != null && arguments.length > 0 && arguments[0] != null) {
                     String secretId = (String) arguments[0];
                     String returnUser = secretId;
                     if (INVALID_USER.equals(secretId)) {
@@ -89,7 +86,9 @@ public class AWSSecretsManagerDriverTest extends TestClass {
                         returnUser = DummyDriver.SQL_ERROR_USERNAME;
                     }
 
-                    return String.format("{\"username\": \"%s\",\n\"password\": \"%s\",\n\"host\": \"%s\"}", returnUser, secretId, secretId);
+                    return String.format(
+                            "{\"username\": \"%s\",\n\"password\": \"%s\",\n\"host\": \"%s\"}",
+                            returnUser, secretId, secretId);
                 }
 
                 return null;
@@ -100,7 +99,7 @@ public class AWSSecretsManagerDriverTest extends TestClass {
             public Boolean answer(InvocationOnMock invocation) throws Throwable {
                 Object[] arguments = invocation.getArguments();
 
-                if (arguments != null && arguments.length > 0 && arguments[0] != null){
+                if (arguments != null && arguments.length > 0 && arguments[0] != null) {
                     String secretId = (String) arguments[0];
                     if (BAD_REFRESH_SECRET.equals(secretId)) {
                         return false;
@@ -127,18 +126,20 @@ public class AWSSecretsManagerDriverTest extends TestClass {
     /*******************************************************************************************************************
      * init Tests
      ******************************************************************************************************************/
-
     @Test
     public void test_init_constructor_null_params() {
         try {
             new AWSSecretsManagerDummyDriver((SecretsManagerClientBuilder) null);
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
         try {
             new AWSSecretsManagerDummyDriver((SecretCacheConfiguration) null);
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
         try {
             new AWSSecretsManagerDummyDriver((SecretsManagerClient) null);
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
     }
 
     @Test
@@ -151,7 +152,6 @@ public class AWSSecretsManagerDriverTest extends TestClass {
     /*******************************************************************************************************************
      * getWrappedDriver Tests
      ******************************************************************************************************************/
-
     @Test
     public void test_getWrappedDriver_works_goodDriver() {
         assertEquals(DummyDriver.instance, sut.getWrappedDriver());
@@ -166,7 +166,6 @@ public class AWSSecretsManagerDriverTest extends TestClass {
     /*******************************************************************************************************************
      * acceptsURL Tests
      ******************************************************************************************************************/
-
     @Test
     public void test_acceptsURL_throws_nullURL() {
         assertThrows(SQLException.class, () -> sut.acceptsURL(null));
@@ -199,7 +198,6 @@ public class AWSSecretsManagerDriverTest extends TestClass {
     /*******************************************************************************************************************
      * connect Tests
      ******************************************************************************************************************/
-
     @Test
     public void test_connect_throws_nullURL() {
         assertThrows(SQLException.class, () -> sut.connect(null, null));
@@ -312,7 +310,6 @@ public class AWSSecretsManagerDriverTest extends TestClass {
     /*******************************************************************************************************************
      * getMajorVersion Tests
      ******************************************************************************************************************/
-
     @Test
     public void test_getMajorVersion_propagatesToRealDriver() {
         assertEquals(DummyDriver.GET_MAJOR_VERSION_RETURN_VALUE, sut.getMajorVersion());
@@ -322,7 +319,6 @@ public class AWSSecretsManagerDriverTest extends TestClass {
     /*******************************************************************************************************************
      * getMinorVersion Tests
      ******************************************************************************************************************/
-
     @Test
     public void test_getMinorVersion_propagatesToRealDriver() {
         assertEquals(DummyDriver.GET_MINOR_VERSION_RETURN_VALUE, sut.getMinorVersion());
@@ -332,7 +328,6 @@ public class AWSSecretsManagerDriverTest extends TestClass {
     /*******************************************************************************************************************
      * getParentLogger Tests
      ******************************************************************************************************************/
-
     @Test
     public void test_getParentLogger_propagatesToRealDriver() {
         assertNotThrows(() -> assertEquals(null, sut.getParentLogger()));
@@ -342,7 +337,6 @@ public class AWSSecretsManagerDriverTest extends TestClass {
     /*******************************************************************************************************************
      * getPropertyInfo Tests
      ******************************************************************************************************************/
-
     @Test
     public void test_getPropertyInfo_propagatesToRealDriver() {
         String param1 = "jdbc-secretsmanager:expectedUrl";
@@ -357,7 +351,6 @@ public class AWSSecretsManagerDriverTest extends TestClass {
     /*******************************************************************************************************************
      * jdbcCompliant Tests
      ******************************************************************************************************************/
-
     @Test
     public void test_jdbcCompliant_propagatesToRealDriver() {
         assertEquals(true, sut.jdbcCompliant());

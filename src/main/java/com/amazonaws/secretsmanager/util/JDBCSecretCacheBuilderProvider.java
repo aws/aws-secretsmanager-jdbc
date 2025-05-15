@@ -1,9 +1,7 @@
 package com.amazonaws.secretsmanager.util;
 
-import java.net.URI;
-
 import com.amazonaws.secretsmanager.sql.AWSSecretsManagerDriver;
-
+import java.net.URI;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClientBuilder;
@@ -57,12 +55,14 @@ public class JDBCSecretCacheBuilderProvider {
 
         SecretsManagerClientBuilder builder = SecretsManagerClient.builder();
 
-        //Retrieve data from information sources.
-        String vpcEndpointUrl = configFile.getStringPropertyWithDefault(AWSSecretsManagerDriver.PROPERTY_PREFIX+"."+PROPERTY_VPC_ENDPOINT_URL, null);
-        String vpcEndpointRegion = configFile.getStringPropertyWithDefault(AWSSecretsManagerDriver.PROPERTY_PREFIX+"."+PROPERTY_VPC_ENDPOINT_REGION, null);
+        // Retrieve data from information sources.
+        String vpcEndpointUrl = configFile.getStringPropertyWithDefault(
+                AWSSecretsManagerDriver.PROPERTY_PREFIX + "." + PROPERTY_VPC_ENDPOINT_URL, null);
+        String vpcEndpointRegion = configFile.getStringPropertyWithDefault(
+                AWSSecretsManagerDriver.PROPERTY_PREFIX + "." + PROPERTY_VPC_ENDPOINT_REGION, null);
         String envRegion = System.getenv(REGION_ENVIRONMENT_VARIABLE);
-        String configRegion = configFile.getStringPropertyWithDefault(AWSSecretsManagerDriver.PROPERTY_PREFIX+"."+PROPERTY_REGION, null);
-
+        String configRegion = configFile.getStringPropertyWithDefault(
+                AWSSecretsManagerDriver.PROPERTY_PREFIX + "." + PROPERTY_REGION, null);
 
         // Apply settings to our builder configuration.
         if (StringUtils.isNotBlank(vpcEndpointUrl) && StringUtils.isNotBlank(vpcEndpointRegion)) {

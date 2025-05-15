@@ -17,7 +17,6 @@ import static org.junit.Assert.assertFalse;
 
 import java.util.NoSuchElementException;
 import java.util.Properties;
-
 import org.junit.Test;
 
 /**

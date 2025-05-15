@@ -12,11 +12,9 @@
  */
 package com.amazonaws.secretsmanager.sql;
 
-import java.sql.SQLException;
-
 import com.amazonaws.secretsmanager.caching.SecretCache;
 import com.amazonaws.secretsmanager.caching.SecretCacheConfiguration;
-
+import java.sql.SQLException;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClientBuilder;
 import software.amazon.awssdk.utils.StringUtils;
@@ -113,7 +111,8 @@ public final class AWSSecretsManagerPostgreSQLDriver extends AWSSecretsManagerDr
         if (e instanceof SQLException) {
             SQLException sqle = (SQLException) e;
             String sqlState = sqle.getSQLState();
-            return sqlState.equals(ACCESS_DENIED_FOR_USER_USING_PASSWORD_TO_DATABASE) || sqlState.equals(ACCESS_DENIED_FOR_INVALID_AUTHORIZATION_SPECIFICATION);
+            return sqlState.equals(ACCESS_DENIED_FOR_USER_USING_PASSWORD_TO_DATABASE)
+                    || sqlState.equals(ACCESS_DENIED_FOR_INVALID_AUTHORIZATION_SPECIFICATION);
         }
         return false;
     }

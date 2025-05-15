@@ -38,4 +38,3 @@ public class PropertyException extends RuntimeException {
         super(message);
     }
 }
-

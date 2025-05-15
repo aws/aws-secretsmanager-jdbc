@@ -22,8 +22,18 @@ jobs:
           java-version: 11
           distribution: adopt
 
+      - name: Prettier
+        uses: rutajdash/prettier-cli-action@v1.0.2
+        with:
+          file_pattern: "**/*.{md,yml}"
+
+      - name: Check formatting
+        run: mvn spotless:check
+
       - name: Build with Maven
         run: mvn --batch-mode --update-snapshots package
 
       - name: Codecov
         uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}

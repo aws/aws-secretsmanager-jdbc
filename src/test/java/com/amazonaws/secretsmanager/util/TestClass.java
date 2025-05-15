@@ -17,7 +17,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.LinkedList;
-
 import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest;
 
 /**
@@ -159,8 +158,8 @@ public class TestClass {
         } catch (Exception e) {
             if (!exception.isAssignableFrom(e.getClass())) {
                 e.printStackTrace();
-                throw new RuntimeException(
-                        "Should have thrown a " + exception.getName() + " but threw " + e.getClass().getName());
+                throw new RuntimeException("Should have thrown a " + exception.getName() + " but threw "
+                        + e.getClass().getName());
             }
         }
     }
@@ -172,8 +171,8 @@ public class TestClass {
         } catch (Exception e) {
             if (!exception.equals(e)) {
                 e.printStackTrace();
-                throw new RuntimeException(
-                        "Should have thrown a " + exception.getMessage() + " but threw " + e.getClass().getName());
+                throw new RuntimeException("Should have thrown a " + exception.getMessage() + " but threw "
+                        + e.getClass().getName());
             }
         }
     }
@@ -183,7 +182,8 @@ public class TestClass {
             code.run();
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("Should not have thrown, but threw " + e.getClass().getName());
+            throw new RuntimeException(
+                    "Should not have thrown, but threw " + e.getClass().getName());
         }
     }
 }

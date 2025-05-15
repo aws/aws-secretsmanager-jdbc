@@ -17,7 +17,6 @@ import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.NoSuchElementException;
 import java.util.Properties;
-
 import lombok.EqualsAndHashCode;
 
 /**
@@ -70,7 +69,7 @@ public final class Config {
 
         try {
             configFile = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourceName);
-            if(configFile != null) {
+            if (configFile != null) {
                 newConfig.load(configFile);
                 configFile.close();
             }
@@ -172,7 +171,7 @@ public final class Config {
     public String fullPropertyName(String propertyName) {
         if (prefix != null) {
             return prefix + "." + propertyName;
-        } else  {
+        } else {
             return propertyName;
         }
     }
@@ -211,11 +210,13 @@ public final class Config {
         if (propertyValue == null) {
             return defaultValue;
         } else {
-            try  {
+            try {
                 return Integer.parseInt(propertyValue);
             } catch (NumberFormatException e) {
-                throw new PropertyException(fullPropertyName(propertyName) + " must be of type int. Please check "
-                                            + Config.CONFIG_FILE_NAME + " or your system properties for typos.", e);
+                throw new PropertyException(
+                        fullPropertyName(propertyName) + " must be of type int. Please check " + Config.CONFIG_FILE_NAME
+                                + " or your system properties for typos.",
+                        e);
             }
         }
     }
@@ -237,11 +238,13 @@ public final class Config {
         if (propertyValue == null) {
             return defaultValue;
         } else {
-            try  {
+            try {
                 return Long.parseLong(propertyValue);
             } catch (NumberFormatException e) {
-                throw new PropertyException(fullPropertyName(propertyName) + " must be of type long. Please check "
-                                            + Config.CONFIG_FILE_NAME + " or your system properties for typos.", e);
+                throw new PropertyException(
+                        fullPropertyName(propertyName) + " must be of type long. Please check "
+                                + Config.CONFIG_FILE_NAME + " or your system properties for typos.",
+                        e);
             }
         }
     }
@@ -262,12 +265,13 @@ public final class Config {
         if (propertyValue == null) {
             return defaultValue;
         } else {
-            try  {
+            try {
                 return Class.forName(propertyValue);
             } catch (ClassNotFoundException e) {
-                throw new PropertyException(fullPropertyName(propertyName) + " must be a valid class name. Please check"
-                                           + " " + Config.CONFIG_FILE_NAME + " or your system properties for typos.",
-                                           e);
+                throw new PropertyException(
+                        fullPropertyName(propertyName) + " must be a valid class name. Please check" + " "
+                                + Config.CONFIG_FILE_NAME + " or your system properties for typos.",
+                        e);
             }
         }
     }
@@ -282,8 +286,8 @@ public final class Config {
     private void throwIfPropertyIsNotSet(String propertyName) {
         if (config.getProperty(propertyName) == null) {
             throw new NoSuchElementException(fullPropertyName(propertyName)
-                                             + " property must be specified either in " + Config.CONFIG_FILE_NAME
-                                             + " or in the system properties.");
+                    + " property must be specified either in " + Config.CONFIG_FILE_NAME
+                    + " or in the system properties.");
         }
     }
 

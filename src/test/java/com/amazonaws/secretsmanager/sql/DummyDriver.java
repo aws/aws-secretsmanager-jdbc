@@ -12,8 +12,8 @@
  */
 package com.amazonaws.secretsmanager.sql;
 
-import java.sql.Driver;
 import java.sql.Connection;
+import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
@@ -38,6 +38,7 @@ public class DummyDriver implements Driver {
     }
 
     public static int acceptsURLCallCount;
+
     @Override
     public boolean acceptsURL(String url) throws SQLException {
         acceptsURLCallCount++;
@@ -47,6 +48,7 @@ public class DummyDriver implements Driver {
     public static final String SQL_ERROR_USERNAME = "SQL_ERROR_USERNAME";
     public static final String RUNTIME_ERROR_USERNAME = "RUNTIME_ERROR_USERNAME";
     public static int connectCallCount;
+
     @Override
     public Connection connect(String url, Properties info) throws SQLException {
         connectCallCount++;
@@ -60,6 +62,7 @@ public class DummyDriver implements Driver {
 
     public static int getMajorVersionCallCount;
     public static final int GET_MAJOR_VERSION_RETURN_VALUE = 87;
+
     @Override
     public int getMajorVersion() {
         getMajorVersionCallCount++;
@@ -68,6 +71,7 @@ public class DummyDriver implements Driver {
 
     public static int getMinorVersionCallCount;
     public static final int GET_MINOR_VERSION_RETURN_VALUE = 75;
+
     @Override
     public int getMinorVersion() {
         getMinorVersionCallCount++;
@@ -75,6 +79,7 @@ public class DummyDriver implements Driver {
     }
 
     public static int getParentLoggerCallCount;
+
     @Override
     public Logger getParentLogger() throws SQLFeatureNotSupportedException {
         getParentLoggerCallCount++;
@@ -84,6 +89,7 @@ public class DummyDriver implements Driver {
     public static int getPropertyInfoCallCount;
     public static String getPropertyInfoParam1;
     public static Properties getPropertyInfoParam2;
+
     @Override
     public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) throws SQLException {
         getPropertyInfoCallCount++;
@@ -93,6 +99,7 @@ public class DummyDriver implements Driver {
     }
 
     public static int jdbcCompliantCallCount;
+
     @Override
     public boolean jdbcCompliant() {
         jdbcCompliantCallCount++;
@@ -110,4 +117,3 @@ public class DummyDriver implements Driver {
         getPropertyInfoParam2 = null;
     }
 }
-

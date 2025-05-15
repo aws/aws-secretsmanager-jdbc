@@ -19,7 +19,7 @@ public class SQLExceptionUtils {
         final List<Throwable> list = new ArrayList<>();
         while (t != null && list.contains(t) == false) {
             list.add(t);
-            if ( t instanceof SQLException && ((SQLException)t).getErrorCode() == errorCode ) {
+            if (t instanceof SQLException && ((SQLException) t).getErrorCode() == errorCode) {
                 return true;
             }
             t = t.getCause();
@@ -27,9 +27,8 @@ public class SQLExceptionUtils {
         return false;
     }
 
-
     /**
      * Hide constructor for static class
      */
-    private SQLExceptionUtils() { }
+    private SQLExceptionUtils() {}
 }

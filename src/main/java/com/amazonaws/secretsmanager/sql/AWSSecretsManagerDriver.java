@@ -12,6 +12,13 @@
  */
 package com.amazonaws.secretsmanager.sql;
 
+import com.amazonaws.secretsmanager.caching.SecretCache;
+import com.amazonaws.secretsmanager.caching.SecretCacheConfiguration;
+import com.amazonaws.secretsmanager.util.Config;
+import com.amazonaws.secretsmanager.util.JDBCSecretCacheBuilderProvider;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Driver;
@@ -22,16 +29,6 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.logging.Logger;
-
-import com.amazonaws.secretsmanager.caching.SecretCache;
-import com.amazonaws.secretsmanager.caching.SecretCacheConfiguration;
-import com.amazonaws.secretsmanager.util.Config;
-import com.amazonaws.secretsmanager.util.JDBCSecretCacheBuilderProvider;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClientBuilder;
 import software.amazon.awssdk.utils.StringUtils;
@@ -105,7 +102,7 @@ public abstract class AWSSecretsManagerDriver implements Driver {
 
     /**
      * Message to return on the RuntimeException when secret string is invalid json
-     */ 
+     */
     public static final String INVALID_SECRET_STRING_JSON = "Could not parse SecretString JSON";
 
     private SecretCache secretCache;
@@ -116,8 +113,6 @@ public abstract class AWSSecretsManagerDriver implements Driver {
 
     private ObjectMapper mapper = new ObjectMapper();
 
-
-
     /**
      * Constructs the driver setting the properties from the properties file using system properties as defaults.
      * Instantiates the secret cache with default options.
@@ -125,7 +120,6 @@ public abstract class AWSSecretsManagerDriver implements Driver {
     protected AWSSecretsManagerDriver() {
         this(new JDBCSecretCacheBuilderProvider().build());
     }
-
 
     /**
      * Constructs the driver setting the properties from the properties file using system properties as defaults.
@@ -196,7 +190,8 @@ public abstract class AWSSecretsManagerDriver implements Driver {
         try {
             Class.forName(this.realDriverClass);
         } catch (ClassNotFoundException e) {
-            throw new IllegalStateException("Could not load real driver with name, \"" + this.realDriverClass + "\".", e);
+            throw new IllegalStateException(
+                    "Could not load real driver with name, \"" + this.realDriverClass + "\".", e);
         }
     }
 
@@ -268,8 +263,8 @@ public abstract class AWSSecretsManagerDriver implements Driver {
             }
         }
         throw new IllegalStateException("No Driver has been registered with name, " + this.realDriverClass
-                                        + ". Please check your system properties or " + Config.CONFIG_FILE_NAME
-                                        + " for typos. Also ensure that the Driver registers itself.");
+                + ". Please check your system properties or " + Config.CONFIG_FILE_NAME
+                + " for typos. Also ensure that the Driver registers itself.");
     }
 
     @Override
@@ -284,7 +279,7 @@ public abstract class AWSSecretsManagerDriver implements Driver {
         } else if (url.startsWith("jdbc:")) {
             // For any other JDBC URL, return false
             return false;
-        } else  {
+        } else {
             // We accept a secret ID as the URL so if the config is set, and it's not a JDBC URL, return true
             return true;
         }
@@ -306,7 +301,7 @@ public abstract class AWSSecretsManagerDriver implements Driver {
 
     /**
      * Construct a database URL from the endpoint, port and database name. This method is called when the
-     * <code>connect</code> method is called with a secret ID instead of a URL. 
+     * <code>connect</code> method is called with a secret ID instead of a URL.
      *
      * @param endpoint                                          The endpoint retrieved from the secret cache
      * @param port                                              The port retrieved from the secret cache
@@ -364,11 +359,10 @@ public abstract class AWSSecretsManagerDriver implements Driver {
                 if (isExceptionDueToAuthenticationError(e)) {
                     boolean refreshSuccess = this.secretCache.refreshNow(credentialsSecretId);
                     if (!refreshSuccess) {
-                        throw(e);
+                        throw (e);
                     }
-                }
-                else {
-                    throw(e);
+                } else {
+                    throw (e);
                 }
             }
         }
@@ -391,8 +385,8 @@ public abstract class AWSSecretsManagerDriver implements Driver {
             try {
                 String secretString = secretCache.getSecretString(url);
                 if (StringUtils.isBlank(secretString)) {
-                    throw new IllegalArgumentException("URL " + url + " is not a valid URL starting with scheme " +
-                            SCHEME + " or a valid retrievable secret ID ");
+                    throw new IllegalArgumentException("URL " + url + " is not a valid URL starting with scheme "
+                            + SCHEME + " or a valid retrievable secret ID ");
                 }
                 JsonNode jsonObject = mapper.readTree(secretString);
                 String endpoint = jsonObject.get("host").asText();

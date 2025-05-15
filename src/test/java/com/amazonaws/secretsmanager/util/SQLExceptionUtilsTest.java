@@ -4,7 +4,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.sql.SQLException;
-
 import org.junit.Test;
 
 public class SQLExceptionUtilsTest {
@@ -43,7 +42,7 @@ public class SQLExceptionUtilsTest {
     public void test_unwrapAndCheckForCode_nonSqlException_parentStillGetsFound() {
         SQLException e0 = new SQLException("", "", 1046);
         Exception e1 = new Exception("test", e0);
-        SQLException e2 = new SQLException("", "", 42,e1);
+        SQLException e2 = new SQLException("", "", 42, e1);
 
         assertTrue(SQLExceptionUtils.unwrapAndCheckForCode(e2, 1046));
     }
