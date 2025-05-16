@@ -30,7 +30,7 @@ To send us a pull request, please:
 
 1. Fork the repository.
 2. Modify the source; please focus on the specific change you are contributing. If you also reformat all the code, it will be hard for us to focus on your change.
-3. Use rustfmt to ensure consistent formatting for `.java` files, and Prettier for `.md` and `.yml` files (see [Formatting instructions](#formatting-instructions)).
+3. Use Spotless to ensure consistent formatting for `.java` files, and Prettier for `.md` and `.yml` files (see [Formatting instructions](#formatting-instructions)).
 4. Ensure local tests pass.
 5. Commit to your fork using clear commit messages.
 6. Send us a pull request, answering any default questions in the pull request interface.
