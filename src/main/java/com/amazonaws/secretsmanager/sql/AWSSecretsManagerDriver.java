@@ -138,7 +138,7 @@ public abstract class AWSSecretsManagerDriver implements Driver {
      *
      * @param cache                                             Secret cache to use to retrieve secrets
      */
-    @SuppressFBWarnings("MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR")
+    @SuppressFBWarnings({"MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", "CT_CONSTRUCTOR_THROW"})
     protected AWSSecretsManagerDriver(SecretCache cache) {
         this.secretCache = cache;
 
@@ -152,6 +152,7 @@ public abstract class AWSSecretsManagerDriver implements Driver {
      *
      * @param builder                                           Builder used to instantiate cache
      */
+    @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
     protected AWSSecretsManagerDriver(SecretsManagerClientBuilder builder) {
         this(new SecretCache(builder));
     }
@@ -162,6 +163,7 @@ public abstract class AWSSecretsManagerDriver implements Driver {
      *
      * @param client                                            AWS Secrets Manager client to instantiate cache
      */
+    @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
     protected AWSSecretsManagerDriver(SecretsManagerClient client) {
         this(new SecretCache(client));
     }
@@ -172,6 +174,7 @@ public abstract class AWSSecretsManagerDriver implements Driver {
      *
      * @param cacheConfig                                       Cache configuration to instantiate cache
      */
+    @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
     protected AWSSecretsManagerDriver(SecretCacheConfiguration cacheConfig) {
         this(new SecretCache(cacheConfig));
     }
@@ -216,6 +219,7 @@ public abstract class AWSSecretsManagerDriver implements Driver {
      *
      * @throws RuntimeException                                 If the driver could not be registered.
      */
+    @SuppressFBWarnings("THROWS_METHOD_THROWS_RUNTIMEEXCEPTION")
     protected static void register(AWSSecretsManagerDriver driver) {
         try {
             DriverManager.registerDriver(driver, () -> shutdown(driver));
@@ -368,6 +372,7 @@ public abstract class AWSSecretsManagerDriver implements Driver {
      *                                                          database.
      * @throws InterruptedException                             If there was an interruption during secret refresh.
      */
+    @SuppressFBWarnings("THROWS_METHOD_THROWS_RUNTIMEEXCEPTION")
     private Connection connectWithSecret(String unwrappedUrl, Properties info, String credentialsSecretId, boolean isSecretId)
             throws SQLException, InterruptedException {
         int retryCount = 0;
@@ -416,6 +421,7 @@ public abstract class AWSSecretsManagerDriver implements Driver {
     }
 
     @Override
+    @SuppressFBWarnings("THROWS_METHOD_THROWS_RUNTIMEEXCEPTION")
     public Connection connect(String url, Properties info) throws SQLException {
         if (!acceptsURL(url)) {
             return null;

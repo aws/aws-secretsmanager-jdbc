@@ -9,20 +9,22 @@
 # the `language` matrix defined below to confirm you have the correct set of
 # supported CodeQL languages.
 #
-name: "CodeQL"
+name: CodeQL
 
 on:
   push:
-    branches: ["master", "v2"]
+    branches: [master, v2]
   pull_request:
-    branches: ["master", "v2"]
+    branches: [master, v2]
   schedule:
-    - cron: '38 2 * * 1'
+    - cron: "38 2 * * 1"
 
 jobs:
   analyze:
     name: Analyze
+
     runs-on: ubuntu-latest
+
     permissions:
       actions: read
       contents: read
@@ -31,20 +33,21 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        language: [ 'java' ]
+        language: ["java"]
+
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v2
-      with:
-        languages: ${{ matrix.language }}
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
 
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@v2
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
 
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v2
-      with:
-        category: "/language:${{matrix.language}}"
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{matrix.language}}"
