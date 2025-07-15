@@ -1,6 +1,8 @@
 name: Java Build
 
 on:
+  push:
+    branches: [v2, master]
   pull_request:
     types: [opened, synchronize, ready_for_review]
 
