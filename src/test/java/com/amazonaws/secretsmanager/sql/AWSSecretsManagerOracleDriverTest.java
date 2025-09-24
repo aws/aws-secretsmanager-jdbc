@@ -20,12 +20,8 @@ import java.sql.SQLException;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.amazonaws.secretsmanager.caching.SecretCache;
 import com.amazonaws.secretsmanager.util.TestClass;
@@ -33,9 +29,6 @@ import com.amazonaws.secretsmanager.util.TestClass;
 /**
  * Tests for the Oracle Driver.
  */
-@RunWith(PowerMockRunner.class)
-@SuppressStaticInitializationFor("com.amazonaws.secretsmanager.sql.AWSSecretsManagerOracleDriver")
-@PowerMockIgnore("jdk.internal.reflect.*")
 public class AWSSecretsManagerOracleDriverTest extends TestClass {
 
     private AWSSecretsManagerOracleDriver sut;
@@ -46,7 +39,7 @@ public class AWSSecretsManagerOracleDriverTest extends TestClass {
     @Before
     public void setup() {
         System.setProperty("drivers.oracle.realDriverClass", "com.amazonaws.secretsmanager.sql.DummyDriver");
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         try {
             sut = new AWSSecretsManagerOracleDriver(cache);
         } catch (Exception e) {

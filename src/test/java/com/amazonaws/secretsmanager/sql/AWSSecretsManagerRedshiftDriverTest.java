@@ -20,12 +20,8 @@ import java.sql.SQLException;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.amazonaws.secretsmanager.caching.SecretCache;
 import com.amazonaws.secretsmanager.util.TestClass;
@@ -33,9 +29,6 @@ import com.amazonaws.secretsmanager.util.TestClass;
 /**
  * Tests for the Redshift Driver.
  */
-@RunWith(PowerMockRunner.class)
-@SuppressStaticInitializationFor("com.amazonaws.secretsmanager.sql.AWSSecretsManagerRedshiftDriver")
-@PowerMockIgnore("jdk.internal.reflect.*")
 public class AWSSecretsManagerRedshiftDriverTest extends TestClass {
 
     private AWSSecretsManagerRedshiftDriver sut;
@@ -46,7 +39,7 @@ public class AWSSecretsManagerRedshiftDriverTest extends TestClass {
     @Before
     public void setup() {
         System.setProperty("drivers.redshift.realDriverClass", "com.amazonaws.secretsmanager.sql.DummyDriver");
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         try {
             sut = new AWSSecretsManagerRedshiftDriver(cache);
         } catch (Exception e) {

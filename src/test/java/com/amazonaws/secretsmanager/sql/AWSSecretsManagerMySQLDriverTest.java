@@ -20,12 +20,8 @@ import java.sql.SQLException;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.amazonaws.secretsmanager.caching.SecretCache;
 import com.amazonaws.secretsmanager.util.TestClass;
@@ -33,9 +29,6 @@ import com.amazonaws.secretsmanager.util.TestClass;
 /**
  * Tests for the MySQL Driver.
  */
-@RunWith(PowerMockRunner.class)
-@SuppressStaticInitializationFor("com.amazonaws.secretsmanager.sql.AWSSecretsManagerMySQLDriver")
-@PowerMockIgnore("jdk.internal.reflect.*")
 public class AWSSecretsManagerMySQLDriverTest extends TestClass {
 
     private AWSSecretsManagerMySQLDriver sut;

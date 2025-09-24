@@ -3,6 +3,7 @@ package com.amazonaws.secretsmanager.util;
 import static com.amazonaws.secretsmanager.util.JDBCSecretCacheBuilderProvider.PROPERTY_VPC_ENDPOINT_REGION;
 import static com.amazonaws.secretsmanager.util.JDBCSecretCacheBuilderProvider.PROPERTY_VPC_ENDPOINT_URL;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -199,7 +200,7 @@ public class JDBCSecretCacheBuilderProviderTest {
 
         try {
             SecretsManagerClient client = new JDBCSecretCacheBuilderProvider(configProvider).build().build();
-            assertTrue(client.serviceClientConfiguration().endpointOverride().isEmpty());
+            assertFalse(client.serviceClientConfiguration().endpointOverride().isPresent());
         } catch (SdkClientException e) {
             assertTrue(e.getMessage().startsWith("Unable to load region from any of the providers in the chain"));
         }
@@ -216,7 +217,7 @@ public class JDBCSecretCacheBuilderProviderTest {
 
         try {
             SecretsManagerClient client = new JDBCSecretCacheBuilderProvider(configProvider).build().build();
-            assertTrue(client.serviceClientConfiguration().endpointOverride().isEmpty());
+            assertFalse(client.serviceClientConfiguration().endpointOverride().isPresent());
         } catch (SdkClientException e) {
             assertTrue(e.getMessage().startsWith("Unable to load region from any of the providers in the chain"));
         }

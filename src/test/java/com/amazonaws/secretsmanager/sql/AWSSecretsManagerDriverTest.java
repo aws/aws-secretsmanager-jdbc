@@ -25,15 +25,11 @@ import java.util.Properties;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.amazonaws.secretsmanager.caching.SecretCache;
 import com.amazonaws.secretsmanager.caching.SecretCacheConfiguration;
@@ -46,9 +42,6 @@ import software.amazon.awssdk.services.secretsmanager.SecretsManagerClientBuilde
  * Tests for AWSSecretsManagerDriver. Uses a config file in the resources folder just to make sure it can read from
  * the file.
  */
-@RunWith(PowerMockRunner.class)
-@SuppressStaticInitializationFor({"com.amazonaws.secretsmanager.sql.*"})
-@PowerMockIgnore("jdk.internal.reflect.*")
 public class AWSSecretsManagerDriverTest extends TestClass {
 
     private AWSSecretsManagerDummyDriver sut;
