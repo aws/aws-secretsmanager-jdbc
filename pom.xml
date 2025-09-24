@@ -148,7 +148,7 @@
           <execution>
             <id>attach-sources</id>
             <goals>
-              <goal>jar</goal>
+              <goal>jar-no-fork</goal>
             </goals>
           </execution>
         </executions>
@@ -247,16 +247,14 @@
               </execution>
             </executions>
           </plugin>
-          <plugin>
-            <groupId>org.sonatype.plugins</groupId>
-            <artifactId>nexus-staging-maven-plugin</artifactId>
-            <version>1.7.0</version>
-            <extensions>true</extensions>
-            <configuration>
-              <serverId>sonatype-nexus-staging</serverId>
-              <nexusUrl>https://aws.oss.sonatype.org</nexusUrl>
-              <autoReleaseAfterClose>true</autoReleaseAfterClose>
-            </configuration>
+            <plugin>
+              <groupId>org.sonatype.central</groupId>
+              <artifactId>central-publishing-maven-plugin</artifactId>
+              <version>0.7.0</version>
+              <extensions>true</extensions>
+              <configuration>
+                <publishingServerId>central</publishingServerId>
+              </configuration>
           </plugin>
         </plugins>
       </build>
