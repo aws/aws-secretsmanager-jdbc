@@ -135,7 +135,7 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.5.4</version>
         <configuration>
-          <argLine>-XX:+EnableDynamicAgentLoading -Xshare:off</argLine>
+          <argLine>@{argLine} -XX:+EnableDynamicAgentLoading -Xshare:off</argLine>
         </configuration>
       </plugin>
       <plugin>
