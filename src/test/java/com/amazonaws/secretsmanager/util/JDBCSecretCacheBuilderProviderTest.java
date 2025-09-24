@@ -2,26 +2,29 @@ package com.amazonaws.secretsmanager.util;
 
 import static com.amazonaws.secretsmanager.util.JDBCSecretCacheBuilderProvider.PROPERTY_VPC_ENDPOINT_REGION;
 import static com.amazonaws.secretsmanager.util.JDBCSecretCacheBuilderProvider.PROPERTY_VPC_ENDPOINT_URL;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.contrib.java.lang.system.EnvironmentVariables;
-
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import com.amazonaws.secretsmanager.sql.AWSSecretsManagerDriver;
 
 import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
+import uk.org.webcompere.systemstubs.environment.EnvironmentVariables;
+import uk.org.webcompere.systemstubs.jupiter.SystemStub;
+import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension;
 
+@ExtendWith(SystemStubsExtension.class)
 public class JDBCSecretCacheBuilderProviderTest {
 
-    @Rule
-    public final EnvironmentVariables environmentVariables = new EnvironmentVariables();
+    @SystemStub
+    private EnvironmentVariables environmentVariables = new EnvironmentVariables();
 
     /**
      * SetRegion Tests.
@@ -121,8 +124,8 @@ public class JDBCSecretCacheBuilderProviderTest {
 
         SecretsManagerClient client = new JDBCSecretCacheBuilderProvider(configProvider).build().build();
 
-        assertNotEquals(client.serviceClientConfiguration().region(), Region.US_EAST_2);
-        assertEquals(client.serviceClientConfiguration().region(), Region.EU_WEST_3);
+        assertNotEquals(Region.US_EAST_2, client.serviceClientConfiguration().region());
+        assertEquals(Region.EU_WEST_3, client.serviceClientConfiguration().region());
     }
 
     /**
@@ -179,7 +182,7 @@ public class JDBCSecretCacheBuilderProviderTest {
         Config configProvider = mock(Config.class);
 
         String environmentRegionName = JDBCSecretCacheBuilderProvider.REGION_ENVIRONMENT_VARIABLE;
-        environmentVariables.clear(environmentRegionName);
+        environmentVariables.remove(environmentRegionName);
 
         try {
             new JDBCSecretCacheBuilderProvider(configProvider).build().build();
@@ -199,7 +202,7 @@ public class JDBCSecretCacheBuilderProviderTest {
 
         try {
             SecretsManagerClient client = new JDBCSecretCacheBuilderProvider(configProvider).build().build();
-            assertTrue(client.serviceClientConfiguration().endpointOverride().isEmpty());
+            assertFalse(client.serviceClientConfiguration().endpointOverride().isPresent());
         } catch (SdkClientException e) {
             assertTrue(e.getMessage().startsWith("Unable to load region from any of the providers in the chain"));
         }
@@ -216,7 +219,7 @@ public class JDBCSecretCacheBuilderProviderTest {
 
         try {
             SecretsManagerClient client = new JDBCSecretCacheBuilderProvider(configProvider).build().build();
-            assertTrue(client.serviceClientConfiguration().endpointOverride().isEmpty());
+            assertFalse(client.serviceClientConfiguration().endpointOverride().isPresent());
         } catch (SdkClientException e) {
             assertTrue(e.getMessage().startsWith("Unable to load region from any of the providers in the chain"));
         }

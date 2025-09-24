@@ -42,6 +42,9 @@ public final class AWSSecretsManagerRedshiftDriver extends AWSSecretsManagerDriv
      */
     public static final String ACCESS_DENIED_FOR_USER_USING_PASSWORD_TO_DATABASE = "28P01";
 
+    /**
+     * The Redshift JDBC sub-prefix.
+     */
     public static final String SUBPREFIX = "redshift";
 
     static {

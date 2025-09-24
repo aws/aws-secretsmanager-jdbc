@@ -35,10 +35,17 @@ public class JDBCSecretCacheBuilderProvider {
 
     private Config configFile;
 
+    /**
+     * Constructs the provider with the default configuration.
+     */
     public JDBCSecretCacheBuilderProvider() {
         this(Config.loadMainConfig());
     }
 
+    /**
+     * Constructs the provider with the provided configuration.
+     * @param config Config to use for provider
+     */
     public JDBCSecretCacheBuilderProvider(Config config) {
         configFile = config;
     }

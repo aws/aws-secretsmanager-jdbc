@@ -133,7 +133,7 @@ public abstract class AWSSecretsManagerDriver implements Driver {
      *
      * @param cache                                             Secret cache to use to retrieve secrets
      */
-    @SuppressFBWarnings({"MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", "CT_CONSTRUCTOR_THROW"})
+    @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
     protected AWSSecretsManagerDriver(SecretCache cache) {
         this.secretCache = cache;
 
