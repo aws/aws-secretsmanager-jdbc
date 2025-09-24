@@ -12,19 +12,19 @@
  */
 package com.amazonaws.secretsmanager.sql;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -57,13 +57,13 @@ public class AWSSecretsManagerDriverTest extends TestClass {
 
     boolean hasRefreshed;
 
-    @Before
+    @BeforeEach
     public void setup() throws InterruptedException {
         System.clearProperty("drivers.dummy.realDriverClass");
 
         // Instantiate mocks
         hasRefreshed = false;
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         Mockito.when(cache.getSecretString(Mockito.any(String.class))).thenAnswer(new Answer<String>() {
             @Override
             public String answer(InvocationOnMock invocation) throws Throwable {
@@ -340,7 +340,7 @@ public class AWSSecretsManagerDriverTest extends TestClass {
     public void test_getPropertyInfo_propagatesToRealDriver() {
         String param1 = "jdbc-secretsmanager:expectedUrl";
         Properties param2 = new Properties();
-        assertNotThrows(() -> Assert.assertNull(sut.getPropertyInfo(param1, param2)));
+        assertNotThrows(() -> Assertions.assertNull(sut.getPropertyInfo(param1, param2)));
         assertEquals(1, DummyDriver.getPropertyInfoCallCount);
         String param1Expected = "jdbc:expectedUrl";
         assertEquals(param1Expected, DummyDriver.getPropertyInfoParam1);
