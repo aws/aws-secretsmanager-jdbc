@@ -2,16 +2,16 @@
 
 ### Why is this change being made?
 
-1. Standardize the PR process by adding reviewee and reviewer checklists that ensure consistent validation steps, improve code quality, and make reviews more efficient.
+1.
 
 
 ### What is changing?
 
-1. Setting up change review template for the repo.
+1.
 
 
 ### Related Links
-- **Issue #, if available**: N/A
+- **Issue #, if available**:
 
 ---
 
@@ -19,11 +19,11 @@
 
 ### How was this tested?
 
-1. Validated the MD preview. The template needs to be merged to the main branch to be auto applied.
+1.
 
 ### When testing locally, provide testing artifact(s):
 
-1. N/A
+1.
 
 ---
 
@@ -36,17 +36,17 @@
 - [ ] I have filled out the Description and Testing sections above
   *If not, why:*
 - [ ] Build and Unit tests are passing
-  *If not, why:* Just an MD update. No code changes.
+  *If not, why:*
 - [ ] Unit test coverage check is passing
-  *If not, why:* Just an MD update. No code changes.
+  *If not, why:*
 - [ ] I have ensured no sensitive information is leaking (i.e., no logging of sensitive fields, or otherwise)
   *If not, why:*
 - [ ] I have added explanatory comments for complex logic, new classes/methods and new tests
-  *If not, why:* Just an MD update. No code changes.
+  *If not, why:*
 - [ ] I have updated README/documentation (if needed)
-  *If not, why:* No relevant doc changes required.
+  *If not, why:*
 - [ ] I have clearly called out breaking changes (if any)
-  *If not, why:* Just an MD update. No code changes.
+  *If not, why:*
 
 ---
 
