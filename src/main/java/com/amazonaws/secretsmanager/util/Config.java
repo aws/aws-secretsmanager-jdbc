@@ -273,6 +273,24 @@ public final class Config {
     }
 
     /**
+     * Returns a <code>boolean</code> property or a default value if the property is not set.
+     *
+     * @param propertyName                                      The name of the property to retrieve.
+     * @param defaultValue                                      The default value to use.
+     *
+     * @return boolean                                          The <code>boolean</code> property or a default value if
+     *                                                          the property is not set.
+     */
+    public boolean getBooleanPropertyWithDefault(String propertyName, boolean defaultValue) {
+        String propertyValue = config.getProperty(propertyName);
+        if (propertyValue == null) {
+            return defaultValue;
+        }
+        return Boolean.parseBoolean(propertyValue);
+    }
+
+
+    /**
      * Throws a <code>NoSuchElementException</code> if a value is not set for the given property name.
      *
      * @param propertyName                                      The property to check.

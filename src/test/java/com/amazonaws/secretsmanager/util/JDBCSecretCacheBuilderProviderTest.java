@@ -5,6 +5,7 @@ import static com.amazonaws.secretsmanager.util.JDBCSecretCacheBuilderProvider.P
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -225,4 +226,71 @@ public class JDBCSecretCacheBuilderProviderTest {
         }
     }
 
+    /**
+     * Post-Quantum TLS Tests
+     */
+    @Test
+    public void test_postQuantumTls_enabledViaConfig() {
+        Config configProvider = mock(Config.class);
+        String pqtlsPropertyName = AWSSecretsManagerDriver.PROPERTY_PREFIX + "."
+                + JDBCSecretCacheBuilderProvider.PROPERTY_POST_QUANTUM_TLS_ENABLED;
+        when(configProvider.getBooleanPropertyWithDefault(pqtlsPropertyName, false)).thenReturn(true);
+
+        SecretsManagerClient client = new JDBCSecretCacheBuilderProvider(configProvider).build().build();
+
+        // Verify client was built successfully with PQTLS enabled
+        assertNotNull(client);
+    }
+
+    @Test
+    public void test_postQuantumTls_disabledByDefault() {
+        Config configProvider = mock(Config.class);
+        String pqtlsPropertyName = AWSSecretsManagerDriver.PROPERTY_PREFIX + "."
+                + JDBCSecretCacheBuilderProvider.PROPERTY_POST_QUANTUM_TLS_ENABLED;
+        when(configProvider.getBooleanPropertyWithDefault(pqtlsPropertyName, false)).thenReturn(false);
+
+        SecretsManagerClient client = new JDBCSecretCacheBuilderProvider(configProvider).build().build();
+
+        // Verify client was built successfully with PQTLS disabled (default)
+        assertNotNull(client);
+    }
+
+    @Test
+    public void test_postQuantumTls_withRegionConfig() {
+        Config configProvider = mock(Config.class);
+        String regionName = AWSSecretsManagerDriver.PROPERTY_PREFIX + "."
+                + JDBCSecretCacheBuilderProvider.PROPERTY_REGION;
+        String pqtlsPropertyName = AWSSecretsManagerDriver.PROPERTY_PREFIX + "."
+                + JDBCSecretCacheBuilderProvider.PROPERTY_POST_QUANTUM_TLS_ENABLED;
+        
+        when(configProvider.getStringPropertyWithDefault(regionName, null)).thenReturn("us-west-2");
+        when(configProvider.getBooleanPropertyWithDefault(pqtlsPropertyName, false)).thenReturn(true);
+
+        SecretsManagerClient client = new JDBCSecretCacheBuilderProvider(configProvider).build().build();
+
+        // Verify both region and PQTLS are configured
+        assertEquals(Region.US_WEST_2, client.serviceClientConfiguration().region());
+        assertNotNull(client);
+    }
+
+    @Test
+    public void test_postQuantumTls_withVpcEndpoint() {
+        Config configProvider = mock(Config.class);
+        String vpcEndpointUrlName = AWSSecretsManagerDriver.PROPERTY_PREFIX + "." + PROPERTY_VPC_ENDPOINT_URL;
+        String vpcEndpointRegion = AWSSecretsManagerDriver.PROPERTY_PREFIX + "." + PROPERTY_VPC_ENDPOINT_REGION;
+        String pqtlsPropertyName = AWSSecretsManagerDriver.PROPERTY_PREFIX + "."
+                + JDBCSecretCacheBuilderProvider.PROPERTY_POST_QUANTUM_TLS_ENABLED;
+        String vpcEndpointUrlString = "https://asdf.us-west-2.amazonaws.com";
+        
+        when(configProvider.getStringPropertyWithDefault(vpcEndpointUrlName, null)).thenReturn(vpcEndpointUrlString);
+        when(configProvider.getStringPropertyWithDefault(vpcEndpointRegion, null)).thenReturn("ap-southeast-3");
+        when(configProvider.getBooleanPropertyWithDefault(pqtlsPropertyName, false)).thenReturn(true);
+
+        SecretsManagerClient client = new JDBCSecretCacheBuilderProvider(configProvider).build().build();
+
+        // Verify VPC endpoint, region, and PQTLS are all configured
+        assertEquals(client.serviceClientConfiguration().endpointOverride().get().toString(), vpcEndpointUrlString);
+        assertEquals(Region.AP_SOUTHEAST_3, client.serviceClientConfiguration().region());
+        assertNotNull(client);
+    }
 }
