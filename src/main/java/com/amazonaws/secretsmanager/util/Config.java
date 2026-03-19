@@ -286,6 +286,13 @@ public final class Config {
         if (propertyValue == null) {
             return defaultValue;
         }
+
+        // Validate boolean values
+        if (!"true".equalsIgnoreCase(propertyValue) && !"false".equalsIgnoreCase(propertyValue)) {
+            throw new IllegalArgumentException("Invalid boolean value '" + propertyValue +
+                                            "' for property '" + propertyName + "'. Expected 'true' or 'false'.");
+        }
+        
         return Boolean.parseBoolean(propertyValue);
     }
 

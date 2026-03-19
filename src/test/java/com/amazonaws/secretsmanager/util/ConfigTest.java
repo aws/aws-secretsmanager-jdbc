@@ -14,6 +14,7 @@ package com.amazonaws.secretsmanager.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.NoSuchElementException;
 import java.util.Properties;
@@ -378,7 +379,10 @@ public class ConfigTest extends TestClass {
         Properties props = new Properties();
         props.setProperty("hey", "yes");
         Config config = (Config) callConstructorWithArguments(Config.class, null, props);
-        assertEquals(false, config.getBooleanPropertyWithDefault("hey", false));
-    }
 
+        // Expect IllegalArgumentException for invalid boolean values
+        assertThrows(IllegalArgumentException.class, () -> {
+            config.getBooleanPropertyWithDefault("hey", false);
+        });
+    }
 }

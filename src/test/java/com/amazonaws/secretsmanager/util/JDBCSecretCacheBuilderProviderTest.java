@@ -289,7 +289,7 @@ public class JDBCSecretCacheBuilderProviderTest {
         SecretsManagerClient client = new JDBCSecretCacheBuilderProvider(configProvider).build().build();
 
         // Verify VPC endpoint, region, and PQTLS are all configured
-        assertEquals(client.serviceClientConfiguration().endpointOverride().get().toString(), vpcEndpointUrlString);
+        assertEquals(vpcEndpointUrlString, client.serviceClientConfiguration().endpointOverride().get().toString());
         assertEquals(Region.AP_SOUTHEAST_3, client.serviceClientConfiguration().region());
         assertNotNull(client);
     }
