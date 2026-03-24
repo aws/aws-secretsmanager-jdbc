@@ -280,12 +280,15 @@ public final class Config {
      *
      * @return boolean                                          The <code>boolean</code> property or a default value if
      *                                                          the property is not set.
+     * @throws IllegalArgumentException                         If the property value is not 'true' or 'false' (case-insensitive).
      */
     public boolean getBooleanPropertyWithDefault(String propertyName, boolean defaultValue) {
         String propertyValue = config.getProperty(propertyName);
         if (propertyValue == null) {
             return defaultValue;
         }
+
+        propertyValue = propertyValue.trim();
 
         // Validate boolean values
         if (!"true".equalsIgnoreCase(propertyValue) && !"false".equalsIgnoreCase(propertyValue)) {

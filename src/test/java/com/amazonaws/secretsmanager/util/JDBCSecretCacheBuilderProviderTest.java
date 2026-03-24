@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -239,6 +240,7 @@ public class JDBCSecretCacheBuilderProviderTest {
         SecretsManagerClient client = new JDBCSecretCacheBuilderProvider(configProvider).build().build();
 
         // Verify client was built successfully with PQTLS enabled
+        verify(configProvider).getBooleanPropertyWithDefault(pqtlsPropertyName, false);
         assertNotNull(client);
     }
 
@@ -252,6 +254,7 @@ public class JDBCSecretCacheBuilderProviderTest {
         SecretsManagerClient client = new JDBCSecretCacheBuilderProvider(configProvider).build().build();
 
         // Verify client was built successfully with PQTLS disabled (default)
+        verify(configProvider).getBooleanPropertyWithDefault(pqtlsPropertyName, false);
         assertNotNull(client);
     }
 

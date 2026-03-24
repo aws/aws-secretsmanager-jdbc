@@ -81,9 +81,7 @@ public class JDBCSecretCacheBuilderProvider {
 
         // Configure Post-Quantum TLS if enabled
         if (postQuantumTlsEnabled) {
-            builder.httpClient(AwsCrtHttpClient.builder()
-                .postQuantumTlsEnabled(true)
-                .build());
+            builder.httpClientBuilder(AwsCrtHttpClient.builder().postQuantumTlsEnabled(true));
         }
 
         // Apply settings to our builder configuration.
