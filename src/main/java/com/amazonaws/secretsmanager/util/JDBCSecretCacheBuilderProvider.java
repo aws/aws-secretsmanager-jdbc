@@ -4,6 +4,7 @@ import java.net.URI;
 
 import com.amazonaws.secretsmanager.sql.AWSSecretsManagerDriver;
 
+import software.amazon.awssdk.http.crt.AwsCrtHttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClientBuilder;
@@ -15,6 +16,7 @@ import software.amazon.awssdk.utils.StringUtils;
  *
  * Checks the config file and environment variables for overrides to the default
  * region and applies those changes to the provided secret cache builder.
+ * Supports Post-Quantum TLS (PQTLS) configuration via AwsCrtHttpClient. 
  * </p>
  */
 public class JDBCSecretCacheBuilderProvider {
@@ -30,6 +32,11 @@ public class JDBCSecretCacheBuilderProvider {
      * Configuration properties to override the default region
      */
     static final String PROPERTY_REGION = "region";
+
+    /**
+     * Configuration property to enable Post-Quantum TLS
+     */
+    static final String PROPERTY_POST_QUANTUM_TLS_ENABLED = "postQuantumTlsEnabled";
 
     static final String REGION_ENVIRONMENT_VARIABLE = "AWS_SECRET_JDBC_REGION";
 
@@ -53,10 +60,11 @@ public class JDBCSecretCacheBuilderProvider {
     /**
      * Provides the secrets cache builder.
      *
-     * 1) If a PrivateLink DNS endpoint URL and region are given in the Config, then they are used to configure the endpoint.
-     * 2) The AWS_SECRET_JDBC_REGION environment variable is checked. If set, it is used to configure the region.
-     * 3) The region variable file is checked in the provided Config and, if set, used to configure the region.
-     * 4) Finally, if none of these are not found, the default region provider chain is used.
+     * 1) If Post-Quantum TLS is enabled, configures AwsCrtHttpClient with PQTLS support
+     * 2) If a PrivateLink DNS endpoint URL and region are given in the Config, then they are used to configure the endpoint.
+     * 3) The AWS_SECRET_JDBC_REGION environment variable is checked. If set, it is used to configure the region.
+     * 4) The region variable file is checked in the provided Config and, if set, used to configure the region.
+     * 5) Finally, if none of these are not found, the default region provider chain is used.
      *
      * @return the built secret cache.
      */
@@ -69,7 +77,12 @@ public class JDBCSecretCacheBuilderProvider {
         String vpcEndpointRegion = configFile.getStringPropertyWithDefault(AWSSecretsManagerDriver.PROPERTY_PREFIX+"."+PROPERTY_VPC_ENDPOINT_REGION, null);
         String envRegion = System.getenv(REGION_ENVIRONMENT_VARIABLE);
         String configRegion = configFile.getStringPropertyWithDefault(AWSSecretsManagerDriver.PROPERTY_PREFIX+"."+PROPERTY_REGION, null);
+        boolean postQuantumTlsEnabled = configFile.getBooleanPropertyWithDefault(AWSSecretsManagerDriver.PROPERTY_PREFIX+"."+PROPERTY_POST_QUANTUM_TLS_ENABLED, false);
 
+        // Configure Post-Quantum TLS if enabled
+        if (postQuantumTlsEnabled) {
+            builder.httpClientBuilder(AwsCrtHttpClient.builder().postQuantumTlsEnabled(true));
+        }
 
         // Apply settings to our builder configuration.
         if (StringUtils.isNotBlank(vpcEndpointUrl) && StringUtils.isNotBlank(vpcEndpointRegion)) {

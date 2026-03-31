@@ -119,4 +119,11 @@ drivers.vpcEndpointRegion= #The endpoint region
 drivers.region= #The region to use.
 ```
 
+3. Enable Post-Quantum TLS (PQTLS) by setting the following in the secretsmanager.properties file:
+
+```text
+drivers.postQuantumTlsEnabled=true
+```
+For more information about Post-Quantum TLS in the AWS SDK, see the [AWS SDK for Java documentation](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/http-configuration.html#post-quantum-tls).
+
 If this driver is running on EKS, the library could pick up the credentials of the node it is running on instead of the service account role ([issue](https://github.com/aws/aws-secretsmanager-jdbc/issues/55)). To address this, add version `2` of `software.amazon.awssdk:sts` to your Gradle/Maven project file as a dependency.
