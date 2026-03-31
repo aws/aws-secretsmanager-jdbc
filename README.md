@@ -126,4 +126,6 @@ drivers.postQuantumTlsEnabled=true
 ```
 For more information about Post-Quantum TLS in the AWS SDK, see the [AWS SDK for Java documentation](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/http-configuration.html#post-quantum-tls).
 
+**NOTE**: PQ-TLS using the CRT relies on system libraries and may not work on macOS or Windows ([ref](https://github.com/awslabs/aws-crt-java#tls-behavior)).
+
 If this driver is running on EKS, the library could pick up the credentials of the node it is running on instead of the service account role ([issue](https://github.com/aws/aws-secretsmanager-jdbc/issues/55)). To address this, add version `2` of `software.amazon.awssdk:sts` to your Gradle/Maven project file as a dependency.
