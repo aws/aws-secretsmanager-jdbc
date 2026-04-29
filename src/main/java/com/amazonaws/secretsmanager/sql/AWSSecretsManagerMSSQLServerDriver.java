@@ -43,6 +43,15 @@ public final class AWSSecretsManagerMSSQLServerDriver extends AWSSecretsManagerD
     public static final int LOGIN_FAILED = 18456;
 
     /**
+     * The MSSQLServer error code for when a user logs in from an untrusted domain.
+     *
+     * See
+     * <a href="https://learn.microsoft.com/en-us/sql/relational-databases/errors-events/mssqlserver-18452-database-engine-error">
+     * MSSQL Server error 18452</a>.
+     */
+    public static final int LOGIN_FAILED_UNTRUSTED_DOMAIN = 18452;
+
+    /**
      * Set to sqlserver.
      */
     public static final String SUBPREFIX = "sqlserver";
@@ -109,7 +118,7 @@ public final class AWSSecretsManagerMSSQLServerDriver extends AWSSecretsManagerD
         if (e instanceof SQLException) {
             SQLException sqle = (SQLException) e;
             int errorCode = sqle.getErrorCode();
-            return errorCode == LOGIN_FAILED;
+            return errorCode == LOGIN_FAILED || errorCode == LOGIN_FAILED_UNTRUSTED_DOMAIN;
         }
         return false;
     }

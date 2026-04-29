@@ -59,6 +59,13 @@ public class AWSSecretsManagerDb2DriverTest extends TestClass {
     }
 
     @Test
+    public void test_isExceptionDueToAuthenticationError_returnsTrue_authError() {
+        SQLException e = new SQLException("auth failed", "", -4214);
+
+        assertTrue(sut.isExceptionDueToAuthenticationError(e));
+    }
+
+    @Test
     public void test_isExceptionDueToAuthenticationError_returnsFalse_wrongSQLException() {
         SQLException e = new SQLException("", "", -2323);
 
