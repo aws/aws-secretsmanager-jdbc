@@ -60,6 +60,20 @@ public class AWSSecretsManagerPostgreSQLDriverTest extends TestClass {
     }
 
     @Test
+    public void test_isExceptionDueToAuthenticationError_returnsTrue_invalidAuthorizationSpecification() {
+        SQLException e = new SQLException("", "28000");
+
+        assertTrue(sut.isExceptionDueToAuthenticationError(e));
+    }
+
+    @Test
+    public void test_isExceptionDueToAuthenticationError_returnsTrue_pgbouncerAuthFailure() {
+        SQLException e = new SQLException("cached error", "08P01");
+
+        assertTrue(sut.isExceptionDueToAuthenticationError(e));
+    }
+
+    @Test
     public void test_isExceptionDueToAuthenticationError_returnsFalse_wrongSQLException() {
         SQLException e = new SQLException("", "28P02");
 

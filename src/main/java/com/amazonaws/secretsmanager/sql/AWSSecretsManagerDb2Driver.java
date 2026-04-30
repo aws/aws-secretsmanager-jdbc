@@ -25,7 +25,7 @@ import software.amazon.awssdk.utils.StringUtils;
  * </p>
  *
  * <p>
- * Configuration properties are specified using the "db2" subprefix (e.g drivers.mysql.realDriverClass).
+ * Configuration properties are specified using the "db2" subprefix (e.g drivers.db2.realDriverClass).
  * </p>
  */
 public final class AWSSecretsManagerDb2Driver extends AWSSecretsManagerDriver {
@@ -36,6 +36,13 @@ public final class AWSSecretsManagerDb2Driver extends AWSSecretsManagerDriver {
      * See <a href="https://www.ibm.com/docs/en/db2-for-zos/11?topic=codes-sql-error">Db2 error codes</a>.
      */
     public static final int ACCESS_DENIED_FOR_USER_USING_PASSWORD_TO_DATABASE = -1403;
+
+    /**
+     * The Db2 JDBC driver error code for connection authorization failure (User ID or Password invalid).
+     *
+     * See <a href="https://www.ibm.com/support/pages/why-db2-data-source-failing-connection-authorization-failure-occurred-reason-user-id-or-password-invalid-errorcode-4214-sqlstate28000">IBM Support</a>.
+     */
+    public static final int AUTH_ERROR = -4214;
 
     /**
      * Set to Db2.
@@ -101,7 +108,8 @@ public final class AWSSecretsManagerDb2Driver extends AWSSecretsManagerDriver {
 
     @Override
     public boolean isExceptionDueToAuthenticationError(Exception e) {
-        return SQLExceptionUtils.unwrapAndCheckForCode(e, ACCESS_DENIED_FOR_USER_USING_PASSWORD_TO_DATABASE);
+        return SQLExceptionUtils.unwrapAndCheckForCode(e, ACCESS_DENIED_FOR_USER_USING_PASSWORD_TO_DATABASE)
+            || SQLExceptionUtils.unwrapAndCheckForCode(e, AUTH_ERROR);
     }
 
     @Override

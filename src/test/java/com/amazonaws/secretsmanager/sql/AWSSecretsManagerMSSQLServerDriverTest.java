@@ -60,6 +60,13 @@ public class AWSSecretsManagerMSSQLServerDriverTest extends TestClass {
     }
 
     @Test
+    public void test_isExceptionDueToAuthenticationError_returnsTrue_untrustedDomain() {
+        SQLException e = new SQLException("login failed", "", 18452);
+
+        assertTrue(sut.isExceptionDueToAuthenticationError(e));
+    }
+
+    @Test
     public void test_isExceptionDueToAuthenticationError_returnsFalse_wrongSQLException() {
         SQLException e = new SQLException("", "", 18457);
 
