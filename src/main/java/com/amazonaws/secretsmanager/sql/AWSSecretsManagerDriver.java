@@ -377,6 +377,26 @@ public abstract class AWSSecretsManagerDriver implements Driver {
         throw new SQLException("Connect failed to authenticate: reached max connection retries");
     }
 
+    /**
+     * Validates that secret fields do not contain characters that could be used for URL injection.
+     * Prevents CWE-610 (Externally Controlled Reference to a Resource in Another Sphere).
+     */
+    private void validateSecretFields(String endpoint, String port, String dbname) throws SQLException {
+        if (endpoint == null || endpoint.isEmpty()) {
+            throw new SQLException("Secret 'host' field must not be null or empty.");
+        }
+        if (endpoint.matches(".*[?#&;/@\\\\\\s].*")) {
+            throw new SQLException("Secret 'host' field contains invalid characters. "
+                    + "A valid host must be a hostname or IP address without URL special characters.");
+        }
+        if (port != null && !port.isEmpty() && !port.matches("\\d+")) {
+            throw new SQLException("Secret 'port' field must contain only digits.");
+        }
+        if (dbname != null && !dbname.isEmpty() && dbname.matches(".*[?#&;\\\\\\s].*")) {
+            throw new SQLException("Secret 'dbname' field contains invalid characters.");
+        }
+    }
+
     @Override
     @SuppressFBWarnings("THROWS_METHOD_THROWS_RUNTIMEEXCEPTION")
     public Connection connect(String url, Properties info) throws SQLException {
@@ -400,6 +420,7 @@ public abstract class AWSSecretsManagerDriver implements Driver {
                 String port = portNode == null ? null : portNode.asText();
                 JsonNode dbnameNode = jsonObject.get("dbname");
                 String dbname = dbnameNode == null ? null : dbnameNode.asText();
+                validateSecretFields(endpoint, port, dbname);
                 unwrappedUrl = constructUrlFromEndpointPortDatabase(endpoint, port, dbname);
             } catch (IOException e) {
                 // Most likely to occur in the event that the data is not JSON.
