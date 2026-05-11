@@ -22,6 +22,7 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 import com.amazonaws.secretsmanager.caching.SecretCache;
 import com.amazonaws.secretsmanager.caching.SecretCacheConfiguration;
@@ -107,6 +108,10 @@ public abstract class AWSSecretsManagerDriver implements Driver {
      * Message to return on the RuntimeException when secret string is invalid json
      */ 
     public static final String INVALID_SECRET_STRING_JSON = "Could not parse SecretString JSON";
+
+    private static final Pattern INVALID_HOST_PATTERN = Pattern.compile(".*[?#&;/@\\\\\\s].*");
+    private static final Pattern INVALID_DBNAME_PATTERN = Pattern.compile(".*[?#&;\\\\\\s].*");
+    private static final Pattern DIGITS_ONLY_PATTERN = Pattern.compile("\\d+");
 
     private SecretCache secretCache;
 
@@ -385,14 +390,14 @@ public abstract class AWSSecretsManagerDriver implements Driver {
         if (endpoint == null || endpoint.isEmpty()) {
             throw new SQLException("Secret 'host' field must not be null or empty.");
         }
-        if (endpoint.matches(".*[?#&;/@\\\\\\s].*")) {
+        if (INVALID_HOST_PATTERN.matcher(endpoint).matches()) {
             throw new SQLException("Secret 'host' field contains invalid characters. "
                     + "A valid host must be a hostname or IP address without URL special characters.");
         }
-        if (port != null && !port.isEmpty() && !port.matches("\\d+")) {
+        if (port != null && !port.isEmpty() && !DIGITS_ONLY_PATTERN.matcher(port).matches()) {
             throw new SQLException("Secret 'port' field must contain only digits.");
         }
-        if (dbname != null && !dbname.isEmpty() && dbname.matches(".*[?#&;\\\\\\s].*")) {
+        if (dbname != null && !dbname.isEmpty() && INVALID_DBNAME_PATTERN.matcher(dbname).matches()) {
             throw new SQLException("Secret 'dbname' field contains invalid characters.");
         }
     }
