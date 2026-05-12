@@ -440,4 +440,24 @@ public class AWSSecretsManagerDriverTest extends TestClass {
         assertNotThrows(() -> sut.connect("MINIMAL_SECRET", props));
         assertEquals(1, DummyDriver.connectCallCount);
     }
+
+    @Test
+    public void test_connect_throws_emptyHost() {
+        Mockito.when(cache.getSecretString("EMPTY_HOST")).thenReturn(
+                "{\"username\": \"user\", \"password\": \"pass\", \"host\": \"\", \"port\": \"3306\", \"dbname\": \"test\"}");
+        Properties props = new Properties();
+        props.setProperty("user", "user");
+        assertThrows(SQLException.class, () -> sut.connect("EMPTY_HOST", props));
+        assertEquals(0, DummyDriver.connectCallCount);
+    }
+
+    @Test
+    public void test_connect_works_emptyPortAndDbname() {
+        Mockito.when(cache.getSecretString("EMPTY_OPTIONAL")).thenReturn(
+                "{\"username\": \"user\", \"password\": \"pass\", \"host\": \"valid.host.com\", \"port\": \"\", \"dbname\": \"\"}");
+        Properties props = new Properties();
+        props.setProperty("user", "user");
+        assertNotThrows(() -> sut.connect("EMPTY_OPTIONAL", props));
+        assertEquals(1, DummyDriver.connectCallCount);
+    }
 }
