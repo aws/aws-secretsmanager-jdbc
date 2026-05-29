@@ -12,20 +12,16 @@
  */
 package com.amazonaws.secretsmanager.sql;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.SQLException;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.amazonaws.secretsmanager.caching.SecretCache;
 import com.amazonaws.secretsmanager.util.TestClass;
@@ -33,9 +29,6 @@ import com.amazonaws.secretsmanager.util.TestClass;
 /**
  * Tests for the PostgreSQL Driver.
  */
-@RunWith(PowerMockRunner.class)
-@SuppressStaticInitializationFor("com.amazonaws.secretsmanager.sql.AWSSecretsManagerPostgreSQLDriver")
-@PowerMockIgnore("jdk.internal.reflect.*")
 public class AWSSecretsManagerPostgreSQLDriverTest extends TestClass {
 
     private AWSSecretsManagerPostgreSQLDriver sut;
@@ -43,10 +36,10 @@ public class AWSSecretsManagerPostgreSQLDriverTest extends TestClass {
     @Mock
     private SecretCache cache;
 
-    @Before
+    @BeforeEach
     public void setup() {
         System.setProperty("drivers.postgresql.realDriverClass", "com.amazonaws.secretsmanager.sql.DummyDriver");
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         try {
             sut = new AWSSecretsManagerPostgreSQLDriver(cache);
         } catch (Exception e) {
@@ -62,6 +55,20 @@ public class AWSSecretsManagerPostgreSQLDriverTest extends TestClass {
     @Test
     public void test_isExceptionDueToAuthenticationError_returnsTrue_correctException() {
         SQLException e = new SQLException("", "28P01");
+
+        assertTrue(sut.isExceptionDueToAuthenticationError(e));
+    }
+
+    @Test
+    public void test_isExceptionDueToAuthenticationError_returnsTrue_invalidAuthorizationSpecification() {
+        SQLException e = new SQLException("", "28000");
+
+        assertTrue(sut.isExceptionDueToAuthenticationError(e));
+    }
+
+    @Test
+    public void test_isExceptionDueToAuthenticationError_returnsTrue_pgbouncerAuthFailure() {
+        SQLException e = new SQLException("cached error", "08P01");
 
         assertTrue(sut.isExceptionDueToAuthenticationError(e));
     }

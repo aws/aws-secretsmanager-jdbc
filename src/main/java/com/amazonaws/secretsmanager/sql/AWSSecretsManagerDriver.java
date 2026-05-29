@@ -22,6 +22,7 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 import com.amazonaws.secretsmanager.caching.SecretCache;
 import com.amazonaws.secretsmanager.caching.SecretCacheConfiguration;
@@ -108,10 +109,9 @@ public abstract class AWSSecretsManagerDriver implements Driver {
      */ 
     public static final String INVALID_SECRET_STRING_JSON = "Could not parse SecretString JSON";
 
-    /**
-    * Logger for the AWSSecretsManagerDriver class.
-    */
-    private static final Logger logger = Logger.getLogger(AWSSecretsManagerDriver.class.getName());
+    private static final Pattern INVALID_HOST_PATTERN = Pattern.compile(".*[?#&;/@\\\\\\s].*");
+    private static final Pattern INVALID_DBNAME_PATTERN = Pattern.compile(".*[?#&;\\\\\\s].*");
+    private static final Pattern DIGITS_ONLY_PATTERN = Pattern.compile("\\d+");
 
     private SecretCache secretCache;
 
@@ -138,7 +138,7 @@ public abstract class AWSSecretsManagerDriver implements Driver {
      *
      * @param cache                                             Secret cache to use to retrieve secrets
      */
-    @SuppressFBWarnings({"MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR", "CT_CONSTRUCTOR_THROW"})
+    @SuppressFBWarnings("CT_CONSTRUCTOR_THROW")
     protected AWSSecretsManagerDriver(SecretCache cache) {
         this.secretCache = cache;
 
@@ -420,6 +420,26 @@ public abstract class AWSSecretsManagerDriver implements Driver {
         throw new SQLException("Connect failed to authenticate: reached max connection retries");
     }
 
+    /**
+     * Validates that secret fields do not contain characters that could be used for URL injection.
+     * Prevents CWE-610 (Externally Controlled Reference to a Resource in Another Sphere).
+     */
+    private void validateSecretFields(String endpoint, String port, String dbname) throws SQLException {
+        if (endpoint == null || endpoint.isEmpty()) {
+            throw new SQLException("Secret 'host' field must not be null or empty.");
+        }
+        if (INVALID_HOST_PATTERN.matcher(endpoint).matches()) {
+            throw new SQLException("Secret 'host' field contains invalid characters. "
+                    + "A valid host must be a hostname or IP address without URL special characters.");
+        }
+        if (port != null && !port.isEmpty() && !DIGITS_ONLY_PATTERN.matcher(port).matches()) {
+            throw new SQLException("Secret 'port' field must contain only digits.");
+        }
+        if (dbname != null && !dbname.isEmpty() && INVALID_DBNAME_PATTERN.matcher(dbname).matches()) {
+            throw new SQLException("Secret 'dbname' field contains invalid characters.");
+        }
+    }
+
     @Override
     @SuppressFBWarnings("THROWS_METHOD_THROWS_RUNTIMEEXCEPTION")
     public Connection connect(String url, Properties info) throws SQLException {
@@ -444,6 +464,7 @@ public abstract class AWSSecretsManagerDriver implements Driver {
                 String port = portNode == null ? null : portNode.asText();
                 JsonNode dbnameNode = jsonObject.get("dbname");
                 String dbname = dbnameNode == null ? null : dbnameNode.asText();
+                validateSecretFields(endpoint, port, dbname);
                 unwrappedUrl = constructUrlFromEndpointPortDatabase(endpoint, port, dbname);
                 isSecretId = true;
             } catch (IOException e) {

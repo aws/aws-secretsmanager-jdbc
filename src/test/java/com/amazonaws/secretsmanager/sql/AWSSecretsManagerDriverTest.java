@@ -12,28 +12,24 @@
  */
 package com.amazonaws.secretsmanager.sql;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import com.amazonaws.secretsmanager.caching.SecretCache;
 import com.amazonaws.secretsmanager.caching.SecretCacheConfiguration;
@@ -46,9 +42,6 @@ import software.amazon.awssdk.services.secretsmanager.SecretsManagerClientBuilde
  * Tests for AWSSecretsManagerDriver. Uses a config file in the resources folder just to make sure it can read from
  * the file.
  */
-@RunWith(PowerMockRunner.class)
-@SuppressStaticInitializationFor({"com.amazonaws.secretsmanager.sql.*"})
-@PowerMockIgnore("jdk.internal.reflect.*")
 public class AWSSecretsManagerDriverTest extends TestClass {
 
     private AWSSecretsManagerDummyDriver sut;
@@ -64,13 +57,13 @@ public class AWSSecretsManagerDriverTest extends TestClass {
 
     boolean hasRefreshed;
 
-    @Before
+    @BeforeEach
     public void setup() throws InterruptedException {
         System.clearProperty("drivers.dummy.realDriverClass");
 
         // Instantiate mocks
         hasRefreshed = false;
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         Mockito.when(cache.getSecretString(Mockito.any(String.class))).thenAnswer(new Answer<String>() {
             @Override
             public String answer(InvocationOnMock invocation) throws Throwable {
@@ -347,7 +340,7 @@ public class AWSSecretsManagerDriverTest extends TestClass {
     public void test_getPropertyInfo_propagatesToRealDriver() {
         String param1 = "jdbc-secretsmanager:expectedUrl";
         Properties param2 = new Properties();
-        assertNotThrows(() -> Assert.assertNull(sut.getPropertyInfo(param1, param2)));
+        assertNotThrows(() -> Assertions.assertNull(sut.getPropertyInfo(param1, param2)));
         assertEquals(1, DummyDriver.getPropertyInfoCallCount);
         String param1Expected = "jdbc:expectedUrl";
         assertEquals(param1Expected, DummyDriver.getPropertyInfoParam1);
@@ -362,5 +355,109 @@ public class AWSSecretsManagerDriverTest extends TestClass {
     public void test_jdbcCompliant_propagatesToRealDriver() {
         assertEquals(true, sut.jdbcCompliant());
         assertEquals(1, DummyDriver.jdbcCompliantCallCount);
+    }
+
+    /*******************************************************************************************************************
+     * validateSecretFields Tests (URL Injection Prevention)
+     ******************************************************************************************************************/
+
+    @Test
+    public void test_connect_throws_hostWithFragment() {
+        Mockito.when(cache.getSecretString("MALICIOUS_HOST")).thenReturn(
+                "{\"username\": \"user\", \"password\": \"pass\", \"host\": \"evil.com:3306/x?allowLoadLocalInfile=true#\", \"port\": \"3306\", \"dbname\": \"test\"}");
+        Properties props = new Properties();
+        props.setProperty("user", "user");
+        assertThrows(SQLException.class, () -> sut.connect("MALICIOUS_HOST", props));
+        assertEquals(0, DummyDriver.connectCallCount);
+    }
+
+    @Test
+    public void test_connect_throws_hostWithQuestionMark() {
+        Mockito.when(cache.getSecretString("MALICIOUS_HOST_Q")).thenReturn(
+                "{\"username\": \"user\", \"password\": \"pass\", \"host\": \"evil.com?param=val\", \"port\": \"3306\", \"dbname\": \"test\"}");
+        Properties props = new Properties();
+        props.setProperty("user", "user");
+        assertThrows(SQLException.class, () -> sut.connect("MALICIOUS_HOST_Q", props));
+        assertEquals(0, DummyDriver.connectCallCount);
+    }
+
+    @Test
+    public void test_connect_throws_hostWithSlash() {
+        Mockito.when(cache.getSecretString("MALICIOUS_HOST_SLASH")).thenReturn(
+                "{\"username\": \"user\", \"password\": \"pass\", \"host\": \"evil.com/path\", \"port\": \"3306\", \"dbname\": \"test\"}");
+        Properties props = new Properties();
+        props.setProperty("user", "user");
+        assertThrows(SQLException.class, () -> sut.connect("MALICIOUS_HOST_SLASH", props));
+        assertEquals(0, DummyDriver.connectCallCount);
+    }
+
+    @Test
+    public void test_connect_throws_hostWithAtSign() {
+        Mockito.when(cache.getSecretString("MALICIOUS_HOST_AT")).thenReturn(
+                "{\"username\": \"user\", \"password\": \"pass\", \"host\": \"user@evil.com\", \"port\": \"3306\", \"dbname\": \"test\"}");
+        Properties props = new Properties();
+        props.setProperty("user", "user");
+        assertThrows(SQLException.class, () -> sut.connect("MALICIOUS_HOST_AT", props));
+        assertEquals(0, DummyDriver.connectCallCount);
+    }
+
+    @Test
+    public void test_connect_throws_nonNumericPort() {
+        Mockito.when(cache.getSecretString("BAD_PORT")).thenReturn(
+                "{\"username\": \"user\", \"password\": \"pass\", \"host\": \"valid.host.com\", \"port\": \"3306;inject\", \"dbname\": \"test\"}");
+        Properties props = new Properties();
+        props.setProperty("user", "user");
+        assertThrows(SQLException.class, () -> sut.connect("BAD_PORT", props));
+        assertEquals(0, DummyDriver.connectCallCount);
+    }
+
+    @Test
+    public void test_connect_throws_dbnameWithFragment() {
+        Mockito.when(cache.getSecretString("BAD_DBNAME")).thenReturn(
+                "{\"username\": \"user\", \"password\": \"pass\", \"host\": \"valid.host.com\", \"port\": \"3306\", \"dbname\": \"db#fragment\"}");
+        Properties props = new Properties();
+        props.setProperty("user", "user");
+        assertThrows(SQLException.class, () -> sut.connect("BAD_DBNAME", props));
+        assertEquals(0, DummyDriver.connectCallCount);
+    }
+
+    @Test
+    public void test_connect_works_validHostPortDbname() {
+        Mockito.when(cache.getSecretString("VALID_SECRET")).thenReturn(
+                "{\"username\": \"user\", \"password\": \"pass\", \"host\": \"mydb.us-east-1.rds.amazonaws.com\", \"port\": \"5432\", \"dbname\": \"prod\"}");
+        Properties props = new Properties();
+        props.setProperty("user", "user");
+        assertNotThrows(() -> sut.connect("VALID_SECRET", props));
+        assertEquals(1, DummyDriver.connectCallCount);
+    }
+
+    @Test
+    public void test_connect_works_nullPortAndDbname() {
+        Mockito.when(cache.getSecretString("MINIMAL_SECRET")).thenReturn(
+                "{\"username\": \"user\", \"password\": \"pass\", \"host\": \"localhost\"}");
+        Properties props = new Properties();
+        props.setProperty("user", "user");
+        assertNotThrows(() -> sut.connect("MINIMAL_SECRET", props));
+        assertEquals(1, DummyDriver.connectCallCount);
+    }
+
+    @Test
+    public void test_connect_throws_emptyHost() {
+        Mockito.when(cache.getSecretString("EMPTY_HOST")).thenReturn(
+                "{\"username\": \"user\", \"password\": \"pass\", \"host\": \"\", \"port\": \"3306\", \"dbname\": \"test\"}");
+        Properties props = new Properties();
+        props.setProperty("user", "user");
+        assertThrows(SQLException.class, () -> sut.connect("EMPTY_HOST", props));
+        assertEquals(0, DummyDriver.connectCallCount);
+    }
+
+    @Test
+    public void test_connect_works_emptyPortAndDbname() {
+        Mockito.when(cache.getSecretString("EMPTY_OPTIONAL")).thenReturn(
+                "{\"username\": \"user\", \"password\": \"pass\", \"host\": \"valid.host.com\", \"port\": \"\", \"dbname\": \"\"}");
+        Properties props = new Properties();
+        props.setProperty("user", "user");
+        assertNotThrows(() -> sut.connect("EMPTY_OPTIONAL", props));
+        assertEquals(1, DummyDriver.connectCallCount);
     }
 }

@@ -14,27 +14,20 @@ package com.amazonaws.secretsmanager.sql;
 
 import com.amazonaws.secretsmanager.caching.SecretCache;
 import com.amazonaws.secretsmanager.util.TestClass;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.SuppressStaticInitializationFor;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.sql.SQLException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests for the Db2 Driver.
  */
-@RunWith(PowerMockRunner.class)
-@SuppressStaticInitializationFor("com.amazonaws.secretsmanager.sql.AWSSecretsManagerDb2Driver")
-@PowerMockIgnore("jdk.internal.reflect.*")
 public class AWSSecretsManagerDb2DriverTest extends TestClass {
 
     private AWSSecretsManagerDb2Driver sut;
@@ -42,10 +35,10 @@ public class AWSSecretsManagerDb2DriverTest extends TestClass {
     @Mock
     private SecretCache cache;
 
-    @Before
+    @BeforeEach
     public void setup() {
         System.setProperty("drivers.db2.realDriverClass", "com.amazonaws.secretsmanager.sql.DummyDriver");
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         try {
             sut = new AWSSecretsManagerDb2Driver(cache);
         } catch (Exception e) {
@@ -61,6 +54,13 @@ public class AWSSecretsManagerDb2DriverTest extends TestClass {
     @Test
     public void test_isExceptionDueToAuthenticationError_returnsTrue_correctException() {
         SQLException e = new SQLException("", "", -1403);
+
+        assertTrue(sut.isExceptionDueToAuthenticationError(e));
+    }
+
+    @Test
+    public void test_isExceptionDueToAuthenticationError_returnsTrue_authError() {
+        SQLException e = new SQLException("auth failed", "", -4214);
 
         assertTrue(sut.isExceptionDueToAuthenticationError(e));
     }
