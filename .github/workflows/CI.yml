@@ -30,7 +30,7 @@ jobs:
         run: mvn --batch-mode --update-snapshots package
 
       - name: Codecov
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
         with:
           fail_ci_if_error: true
           use_oidc: true
