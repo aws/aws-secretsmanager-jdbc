@@ -12,7 +12,6 @@
  */
 package com.amazonaws.secretsmanager.sql;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -28,14 +27,14 @@ import com.amazonaws.secretsmanager.caching.SecretCache;
 import com.amazonaws.secretsmanager.caching.SecretCacheConfiguration;
 import com.amazonaws.secretsmanager.util.Config;
 import com.amazonaws.secretsmanager.util.JDBCSecretCacheBuilderProvider;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClientBuilder;
 import software.amazon.awssdk.utils.StringUtils;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * <p>
@@ -120,8 +119,6 @@ public abstract class AWSSecretsManagerDriver implements Driver {
     private Config config;
 
     private ObjectMapper mapper = new ObjectMapper();
-
-
 
     /**
      * Constructs the driver setting the properties from the properties file using system properties as defaults.
@@ -345,23 +342,15 @@ public abstract class AWSSecretsManagerDriver implements Driver {
      *                                                          database.
      * @throws InterruptedException                             If there was an interruption during secret refresh.
      */
-    @SuppressFBWarnings("THROWS_METHOD_THROWS_RUNTIMEEXCEPTION")
     private Connection connectWithSecret(String unwrappedUrl, Properties info, String credentialsSecretId)
             throws SQLException, InterruptedException {
         int retryCount = 0;
         while (retryCount++ <= MAX_RETRY) {
             String secretString = secretCache.getSecretString(credentialsSecretId);
             Properties updatedInfo = new Properties(info);
-            try {
-                JsonNode jsonObject = mapper.readTree(secretString);
-                updatedInfo.setProperty("user", jsonObject.get("username").asText());
-                updatedInfo.setProperty("password", jsonObject.get("password").asText());
-            } catch (IOException e) {
-                // Most likely to occur in the event that the data is not JSON.
-                // Or the secret's username and/or password fields have been
-                // removed entirely. Either scenario is most often a user error.
-                throw new RuntimeException(INVALID_SECRET_STRING_JSON);
-            }
+            JsonNode jsonObject = mapper.readTree(secretString);
+            updatedInfo.setProperty("user", jsonObject.get("username").asString());
+            updatedInfo.setProperty("password", jsonObject.get("password").asString());
 
             try {
                 return getWrappedDriver().connect(unwrappedUrl, updatedInfo);
@@ -413,26 +402,19 @@ public abstract class AWSSecretsManagerDriver implements Driver {
         if (url.startsWith(SCHEME)) { // If this is a URL in the correct scheme, unwrap it
             unwrappedUrl = unwrapUrl(url);
         } else { // Else, assume this is a secret ID and try to retrieve it
-            try {
-                String secretString = secretCache.getSecretString(url);
-                if (StringUtils.isBlank(secretString)) {
-                    throw new IllegalArgumentException("URL " + url + " is not a valid URL starting with scheme " +
-                            SCHEME + " or a valid retrievable secret ID ");
-                }
-                JsonNode jsonObject = mapper.readTree(secretString);
-                String endpoint = jsonObject.get("host").asText();
-                JsonNode portNode = jsonObject.get("port");
-                String port = portNode == null ? null : portNode.asText();
-                JsonNode dbnameNode = jsonObject.get("dbname");
-                String dbname = dbnameNode == null ? null : dbnameNode.asText();
-                validateSecretFields(endpoint, port, dbname);
-                unwrappedUrl = constructUrlFromEndpointPortDatabase(endpoint, port, dbname);
-            } catch (IOException e) {
-                // Most likely to occur in the event that the data is not JSON.
-                // Or the secret has been modified and is no longer valid.
-                // Either scenario is most often a user error.
-                throw new RuntimeException(INVALID_SECRET_STRING_JSON);
+            String secretString = secretCache.getSecretString(url);
+            if (StringUtils.isBlank(secretString)) {
+                throw new IllegalArgumentException("URL " + url + " is not a valid URL starting with scheme " +
+                        SCHEME + " or a valid retrievable secret ID ");
             }
+            JsonNode jsonObject = mapper.readTree(secretString);
+            String endpoint = jsonObject.get("host").asText();
+            JsonNode portNode = jsonObject.get("port");
+            String port = portNode == null ? null : portNode.asText();
+            JsonNode dbnameNode = jsonObject.get("dbname");
+            String dbname = dbnameNode == null ? null : dbnameNode.asText();
+            validateSecretFields(endpoint, port, dbname);
+            unwrappedUrl = constructUrlFromEndpointPortDatabase(endpoint, port, dbname);
         }
 
         if (info != null && info.getProperty("user") != null) {
