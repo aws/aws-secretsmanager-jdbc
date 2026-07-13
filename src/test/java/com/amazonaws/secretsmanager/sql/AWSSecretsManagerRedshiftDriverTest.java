@@ -106,6 +106,24 @@ public class AWSSecretsManagerRedshiftDriverTest extends TestClass {
     }
 
     @Test
+    public void test_enforceSSL_WithDisableMode() {
+        String url = sut.enforceSSL("jdbc:redshift://test-endpoint:1234/dev", "false");
+        assertEquals(url, "jdbc:redshift://test-endpoint:1234/dev");
+    }
+
+    @Test
+    public void test_enforceSSL_WithAllowMode() {
+        String url = sut.enforceSSL("jdbc:redshift://test-endpoint:1234/dev", "true");
+        assertEquals(url, "jdbc:redshift://test-endpoint:1234/dev;ssl=true;");
+    }
+
+    @Test
+    public void test_enforceSSL_WithNonBooleanSSLMode() {
+        String url = sut.enforceSSL("jdbc:redshift://test-endpoint:1234/dev", "verify-full");
+        assertEquals(url, "jdbc:redshift://test-endpoint:1234/dev");
+    }
+
+    @Test
     public void test_getDefaultDriverClass() {
         System.clearProperty("drivers.redshift.realDriverClass");
         AWSSecretsManagerRedshiftDriver sut2 = new AWSSecretsManagerRedshiftDriver(cache);

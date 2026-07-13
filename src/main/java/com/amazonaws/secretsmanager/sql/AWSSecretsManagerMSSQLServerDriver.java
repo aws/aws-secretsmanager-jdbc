@@ -13,6 +13,7 @@
 package com.amazonaws.secretsmanager.sql;
 
 import java.sql.SQLException;
+import com.amazonaws.secretsmanager.util.URLBuilder;
 
 import com.amazonaws.secretsmanager.caching.SecretCache;
 import com.amazonaws.secretsmanager.caching.SecretCacheConfiguration;
@@ -131,6 +132,17 @@ public final class AWSSecretsManagerMSSQLServerDriver extends AWSSecretsManagerD
         }
         if (StringUtils.isNotBlank(dbname)) {
             url += ";databaseName=" + dbname + ";";
+        }
+        return url;
+    }
+
+    @Override
+    public String enforceSSL(String url, String sslMode) {
+       if("true".equalsIgnoreCase(sslMode)) {
+                return new URLBuilder(url)
+                        .appendProperty("encrypt", "true", true)
+                        .appendProperty("trustServerCertificate", "true", true)
+                        .build();
         }
         return url;
     }

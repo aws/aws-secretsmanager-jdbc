@@ -144,6 +144,16 @@ public final class AWSSecretsManagerOracleDriver extends AWSSecretsManagerDriver
     }
 
     @Override
+    public String enforceSSL(String url, String sslMode) {
+        if("true".equalsIgnoreCase(sslMode)) {
+            if (url.startsWith("jdbc:oracle:thin:@//")) {
+                return url.replace("jdbc:oracle:thin:@//", "jdbc:oracle:thin:@tcps://");
+            }
+        }
+        return url;
+    }
+
+    @Override
     public String getDefaultDriverClass() {
         return "oracle.jdbc.OracleDriver";
     }

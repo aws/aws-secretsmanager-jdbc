@@ -106,6 +106,30 @@ public class AWSSecretsManagerPostgreSQLDriverTest extends TestClass {
     }
 
     @Test
+    public void test_enforceSSL_WithDisableMode() {
+        String url = sut.enforceSSL("jdbc:postgresql://test-endpoint:1234/dev", "disable");
+        assertEquals(url, "jdbc:postgresql://test-endpoint:1234/dev");
+    }
+
+    @Test
+    public void test_enforceSSL_WithAllowMode() {
+        String url = sut.enforceSSL("jdbc:postgresql://test-endpoint:1234/dev", "allow");
+        assertEquals(url, "jdbc:postgresql://test-endpoint:1234/dev?sslmode=allow");
+    }
+
+    @Test
+    public void test_enforceSSL_WithDefaultSSLMode() {
+        String url = sut.enforceSSL("jdbc:postgresql://test-endpoint:1234/dev", "Verify_full");
+        assertEquals(url, "jdbc:postgresql://test-endpoint:1234/dev?sslmode=prefer");
+    }
+
+    @Test
+    public void test_enforceSSLNullPort_withVerifyCAMode() {
+        String url = sut.enforceSSL("jdbc:postgresql://test-endpoint/dev", "verify-ca");
+        assertEquals(url, "jdbc:postgresql://test-endpoint/dev?sslmode=verify-ca");
+    }
+
+    @Test
     public void test_getDefaultDriverClass() {
         System.clearProperty("drivers.postgresql.realDriverClass");
         AWSSecretsManagerPostgreSQLDriver sut2 = new AWSSecretsManagerPostgreSQLDriver(cache);
