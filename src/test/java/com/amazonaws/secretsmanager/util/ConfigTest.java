@@ -187,6 +187,14 @@ public class ConfigTest extends TestClass {
     }
 
     @Test
+    public void test_getLongPropertyWithDefault_propertySetWithWhitespace() {
+        Properties props = new Properties();
+        props.setProperty("hey", " 2 ");
+        Config config = (Config) callConstructorWithArguments(Config.class, null, props);
+        assertEquals(2, config.getLongPropertyWithDefault("hey", 3));
+    }
+
+    @Test
     public void test_getLongPropertyWithDefault_propertyNotSet() {
         Properties props = new Properties();
         Config config = (Config) callConstructorWithArguments(Config.class, null, props);
