@@ -223,13 +223,13 @@ public class AWSSecretsManagerDriverTest extends TestClass {
     public void test_connect_passesExtraPropsToRealDriver_withSecretUser() {
         Properties props = new Properties();
         props.setProperty("user", "user");
-        props.setProperty("encrypt", "true");
-        props.setProperty("trustServerCertificate", "true");
+        props.setProperty("xyz", "true");
+        props.setProperty("abc", "true");
         assertNotThrows(() -> sut.connect("jdbc-secretsmanager:expectedUrl", props));
         Properties received = DummyDriver.lastConnectInfo;
-        assertTrue(received.containsKey("encrypt"));
-        assertTrue(received.containsKey("trustServerCertificate"));
-        assertEquals("true", received.get("encrypt"));
+        assertTrue(received.containsKey("xyz"));
+        assertTrue(received.containsKey("abc"));
+        assertEquals("true", received.get("xyz"));
         assertEquals("user", received.get("user"));
         assertEquals("user", received.get("password"));
     }
