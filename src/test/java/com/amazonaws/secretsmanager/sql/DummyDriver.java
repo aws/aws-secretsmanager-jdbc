@@ -47,9 +47,11 @@ public class DummyDriver implements Driver {
     public static final String SQL_ERROR_USERNAME = "SQL_ERROR_USERNAME";
     public static final String RUNTIME_ERROR_USERNAME = "RUNTIME_ERROR_USERNAME";
     public static int connectCallCount;
+    public static Properties lastConnectInfo;
     @Override
     public Connection connect(String url, Properties info) throws SQLException {
         connectCallCount++;
+        lastConnectInfo = info;
         if (info != null && SQL_ERROR_USERNAME.equals(info.getProperty("user"))) {
             throw new SQLException("Invalid SQL Exception!");
         } else if (info != null && RUNTIME_ERROR_USERNAME.equals(info.getProperty("user"))) {
@@ -102,6 +104,7 @@ public class DummyDriver implements Driver {
     public static void reset() {
         acceptsURLCallCount = 0;
         connectCallCount = 0;
+        lastConnectInfo = null;
         getMajorVersionCallCount = 0;
         getMinorVersionCallCount = 0;
         getParentLoggerCallCount = 0;

@@ -220,6 +220,23 @@ public class AWSSecretsManagerDriverTest extends TestClass {
     }
 
     @Test
+    public void test_connect_passesExtraPropsToRealDriver_withSecretUser() {
+        Mockito.when(cache.getSecretString("sample_user")).thenReturn(
+                "{\"username\": \"dbuser\", \"password\": \"dbpass\"}");
+        Properties props = new Properties();
+        props.setProperty("user", "sample_user");
+        props.setProperty("password", "sample_pass");
+        props.setProperty("xyz", "true");
+        props.setProperty("abc", "true");
+        assertNotThrows(() -> sut.connect("jdbc-secretsmanager:expectedUrl", props));
+        Properties received = DummyDriver.lastConnectInfo;
+        assertEquals("true", received.get("xyz"));
+        assertEquals("true", received.get("abc"));
+        assertEquals("dbuser", received.get("user"));
+        assertEquals("dbpass", received.get("password"));
+    }
+
+    @Test
     public void test_connect_jdbc_returnsNull() throws SQLException {
         Connection conn = sut.connect("jdbc:expectedUrl", null);
         assertEquals(conn, null);

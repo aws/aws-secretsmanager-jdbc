@@ -351,7 +351,10 @@ public abstract class AWSSecretsManagerDriver implements Driver {
         int retryCount = 0;
         while (retryCount++ <= MAX_RETRY) {
             String secretString = secretCache.getSecretString(credentialsSecretId);
-            Properties updatedInfo = new Properties(info);
+            Properties updatedInfo = new Properties();
+            for (String name : info.stringPropertyNames()) {
+                updatedInfo.setProperty(name, info.getProperty(name));
+            }
             try {
                 JsonNode jsonObject = mapper.readTree(secretString);
                 updatedInfo.setProperty("user", jsonObject.get("username").asText());
