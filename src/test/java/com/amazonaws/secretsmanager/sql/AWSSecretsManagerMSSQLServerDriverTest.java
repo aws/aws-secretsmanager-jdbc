@@ -99,6 +99,18 @@ public class AWSSecretsManagerMSSQLServerDriverTest extends TestClass {
     }
 
     @Test
+    public void test_enforceSSL_WithDisabledMode() {
+        String url = sut.enforceSSL("jdbc:sqlserver://test-endpoint:1234;databaseName=dev;", "false");
+        assertEquals(url, "jdbc:sqlserver://test-endpoint:1234;databaseName=dev;");
+    }
+
+    @Test
+    public void test_enforceSSL_WithDefaultSSLMode() {
+        String url = sut.enforceSSL("jdbc:sqlserver://test-endpoint:1234;databaseName=dev;", "true");
+        assertEquals(url, "jdbc:sqlserver://test-endpoint:1234;databaseName=dev;encrypt=true;trustServerCertificate=true;");
+    }
+
+    @Test
     public void test_getDefaultDriverClass() {
         System.clearProperty("drivers.sqlserver.realDriverClass");
         AWSSecretsManagerMSSQLServerDriver sut2 = new AWSSecretsManagerMSSQLServerDriver(cache);
