@@ -13,6 +13,7 @@
 package com.amazonaws.secretsmanager.sql;
 
 import java.sql.SQLException;
+import com.amazonaws.secretsmanager.util.URLBuilder;
 
 import com.amazonaws.secretsmanager.caching.SecretCache;
 import com.amazonaws.secretsmanager.caching.SecretCacheConfiguration;
@@ -145,6 +146,30 @@ public final class AWSSecretsManagerPostgreSQLDriver extends AWSSecretsManagerDr
             url += dbname;
         }
 
+        return url;
+    }
+
+    @Override
+    public String enforceSSL(String url, String sslMode) {
+
+        if (url.endsWith("/")) {
+            url = url.substring(0, url.length() - 1);
+        }
+
+        URLBuilder builder = new URLBuilder(url);
+
+        switch(sslMode) {
+            case "disable":
+                break;
+            case "allow":
+            case "prefer":
+            case "require":
+            case "verify-ca":
+            case "verify-full":
+                return builder.appendParameter("sslmode", sslMode, !url.contains("?")).build();
+            default:
+                return builder.appendParameter("sslmode", "prefer", !url.contains("?")).build();
+        }
         return url;
     }
 

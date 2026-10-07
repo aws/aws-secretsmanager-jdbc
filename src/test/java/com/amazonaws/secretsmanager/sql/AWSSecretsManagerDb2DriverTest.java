@@ -94,7 +94,31 @@ public class AWSSecretsManagerDb2DriverTest extends TestClass {
     @Test
     public void test_constructUrlNullDatabase() {
         String url = sut.constructUrlFromEndpointPortDatabase("test-endpoint", "1234", null);
-        assertEquals(url, "jdbc:db2://test-endpoint:1234");
+        assertEquals(url, "jdbc:db2://test-endpoint:1234/");
+    }
+
+    @Test
+    public void test_enforceSSL_WithTrueSSLMode() {
+        String url = sut.enforceSSL("jdbc:db2://test-endpoint:1234/dev", "true");
+        assertEquals(url, "jdbc:db2://test-endpoint:1234/dev:sslConnection=true;");
+    }
+
+    @Test
+    public void test_enforceSSLNullPort_WithTrueSSLModeUpperCas() {
+        String url = sut.enforceSSL("jdbc:db2://test-endpoint/dev", "TRUE");
+        assertEquals(url, "jdbc:db2://test-endpoint/dev:sslConnection=true;");
+    }
+
+    @Test
+    public void test_enforceSSLNullDatabase_WithTrueSSLMode() {
+        String url = sut.enforceSSL("jdbc:db2://test-endpoint:1234/", "TRue");
+        assertEquals(url, "jdbc:db2://test-endpoint:1234/:sslConnection=true;");
+    }
+
+    @Test
+    public void test_enforceSSL_WithNonBooleanSSLMode() {
+        String url = sut.enforceSSL("jdbc:db2://test-endpoint:1234/dev", "verify-full");
+        assertEquals(url, "jdbc:db2://test-endpoint:1234/dev");
     }
 
     @Test

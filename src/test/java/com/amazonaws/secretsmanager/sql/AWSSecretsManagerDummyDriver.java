@@ -89,6 +89,11 @@ public class AWSSecretsManagerDummyDriver extends AWSSecretsManagerDriver {
     }
 
     @Override
+    public String enforceSSL(String url, String sslMode) {
+        return "mysslconnectionurl";
+    }
+
+    @Override
     public String getDefaultDriverClass() {
         return "com.amazonaws.secretsmanager.sql.DummyDriver";
     }

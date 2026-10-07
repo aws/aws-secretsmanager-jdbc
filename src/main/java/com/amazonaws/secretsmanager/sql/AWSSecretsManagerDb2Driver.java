@@ -15,6 +15,7 @@ package com.amazonaws.secretsmanager.sql;
 import com.amazonaws.secretsmanager.caching.SecretCache;
 import com.amazonaws.secretsmanager.caching.SecretCacheConfiguration;
 import com.amazonaws.secretsmanager.util.SQLExceptionUtils;
+import com.amazonaws.secretsmanager.util.URLBuilder;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClientBuilder;
 import software.amazon.awssdk.utils.StringUtils;
@@ -120,6 +121,17 @@ public final class AWSSecretsManagerDb2Driver extends AWSSecretsManagerDriver {
         }
         if (StringUtils.isNotBlank(dbname)) {
             url += "/" + dbname;
+        }
+        else {
+            url += "/";
+        }
+        return url;
+    }
+
+    @Override
+    public String enforceSSL(String url, String sslMode) {
+        if("true".equalsIgnoreCase(sslMode)) {
+            return new URLBuilder(url).appendProperty("sslConnection", "true", false).build();
         }
         return url;
     }
