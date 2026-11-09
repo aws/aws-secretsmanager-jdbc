@@ -128,4 +128,17 @@ For more information about Post-Quantum TLS in the AWS SDK, see the [AWS SDK for
 
 **NOTE**: PQ-TLS uses the AWS Common Runtime (CRT) which relies on system libraries and may not work as expected on macOS or Windows at this time ([ref](https://github.com/awslabs/aws-crt-java#tls-behavior)).
 
+4. When the driver builds its own Secrets Manager client (the standard `DriverManager` and secretsmanager.properties setup), each API call attempt times out after 2 seconds. A timed out attempt is retried like any other network error, so with the SDK's default retries an endpoint that stops answering fails the connection attempt after about 10 seconds instead of hanging. To change the timeout, set a positive number of milliseconds in the secretsmanager.properties file (the SDK has no setting that turns it off, so use a large value if you expect slow calls):
+
+```text
+drivers.apiCallAttemptTimeoutMillis=2000
+```
+
+If you construct a driver with your own `SecretsManagerClient`, client builder, `SecretCache`, or `SecretCacheConfiguration`, this property doesn't apply, so set the timeout on your client yourself:
+
+```java
+SecretsManagerClientBuilder builder = SecretsManagerClient.builder()
+    .overrideConfiguration(c -> c.apiCallAttemptTimeout(Duration.ofSeconds(2)));
+```
+
 If this driver is running on EKS, the library could pick up the credentials of the node it is running on instead of the service account role ([issue](https://github.com/aws/aws-secretsmanager-jdbc/issues/55)). To address this, add version `2` of `software.amazon.awssdk:sts` to your Gradle/Maven project file as a dependency.

@@ -238,7 +238,7 @@ public final class Config {
             return defaultValue;
         } else {
             try  {
-                return Long.parseLong(propertyValue);
+                return Long.parseLong(propertyValue.trim());
             } catch (NumberFormatException e) {
                 throw new PropertyException(fullPropertyName(propertyName) + " must be of type long. Please check "
                                             + Config.CONFIG_FILE_NAME + " or your system properties for typos.", e);

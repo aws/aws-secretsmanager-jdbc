@@ -6,15 +6,28 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.time.Duration;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import com.amazonaws.secretsmanager.caching.SecretCache;
 import com.amazonaws.secretsmanager.sql.AWSSecretsManagerDriver;
 
+import software.amazon.awssdk.core.exception.ApiCallAttemptTimeoutException;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
@@ -29,11 +42,22 @@ public class JDBCSecretCacheBuilderProviderTest {
     private EnvironmentVariables environmentVariables = new EnvironmentVariables();
 
     /**
+     * A mock config that returns the default for every long property, like a real
+     * config with none of them set.
+     */
+    private static Config mockConfig() {
+        Config configProvider = mock(Config.class);
+        when(configProvider.getLongPropertyWithDefault(anyString(), anyLong()))
+                .thenAnswer(invocation -> invocation.getArgument(1));
+        return configProvider;
+    }
+
+    /**
      * SetRegion Tests.
      */
     @Test
     public void test_setRegion_configFileProperty() {
-        Config configProvider = mock(Config.class);
+        Config configProvider = mockConfig();
         String regionName = AWSSecretsManagerDriver.PROPERTY_PREFIX + "."
                 + JDBCSecretCacheBuilderProvider.PROPERTY_REGION;
         when(configProvider.getStringPropertyWithDefault(regionName, null)).thenReturn("us-west-2");
@@ -45,7 +69,7 @@ public class JDBCSecretCacheBuilderProviderTest {
 
     @Test
     public void test_setRegion_environmentVariable() {
-        Config configProvider = mock(Config.class);
+        Config configProvider = mockConfig();
 
         String environmentRegionName = JDBCSecretCacheBuilderProvider.REGION_ENVIRONMENT_VARIABLE;
         environmentVariables.set(environmentRegionName, "us-east-1");
@@ -57,7 +81,7 @@ public class JDBCSecretCacheBuilderProviderTest {
 
     @Test
     public void test_setRegion_vpcEndpoint() {
-        Config configProvider = mock(Config.class);
+        Config configProvider = mockConfig();
         String vpcEndpointUrlName = AWSSecretsManagerDriver.PROPERTY_PREFIX + "." + PROPERTY_VPC_ENDPOINT_URL;
         String vpcEndpointRegion = AWSSecretsManagerDriver.PROPERTY_PREFIX + "." + PROPERTY_VPC_ENDPOINT_REGION;
         String vpcEndpointUrlString = "https://asdf.us-west-2.amazonaws.com";
@@ -85,7 +109,7 @@ public class JDBCSecretCacheBuilderProviderTest {
 
     @Test
     public void test_regionSelectionOrder_prefersVpcEndpointOverEverything() {
-        Config configProvider = mock(Config.class);
+        Config configProvider = mockConfig();
 
         // Arrange so all properties return something valid.
         String regionName = AWSSecretsManagerDriver.PROPERTY_PREFIX + "."
@@ -115,7 +139,7 @@ public class JDBCSecretCacheBuilderProviderTest {
 
     @Test
     public void test_regionSelectionOrder_prefersEnvironmentVarOverConfig() {
-        Config configProvider = mock(Config.class);
+        Config configProvider = mockConfig();
 
         String regionName = AWSSecretsManagerDriver.PROPERTY_PREFIX + "."
                 + JDBCSecretCacheBuilderProvider.PROPERTY_REGION;
@@ -136,7 +160,7 @@ public class JDBCSecretCacheBuilderProviderTest {
     @Test
     public void test_settingValidation_emptyConfigPropertyIgnored() {
 
-        Config configProvider = mock(Config.class);
+        Config configProvider = mockConfig();
         String regionName = AWSSecretsManagerDriver.PROPERTY_PREFIX + "."
                 + JDBCSecretCacheBuilderProvider.PROPERTY_REGION;
         when(configProvider.getStringPropertyWithDefault(regionName, null)).thenReturn("");
@@ -151,7 +175,7 @@ public class JDBCSecretCacheBuilderProviderTest {
     @Test
     public void test_settingValidation_nullConfigPropertyIgnored() {
 
-        Config configProvider = mock(Config.class);
+        Config configProvider = mockConfig();
         String regionName = AWSSecretsManagerDriver.PROPERTY_PREFIX + "."
                 + JDBCSecretCacheBuilderProvider.PROPERTY_REGION;
         when(configProvider.getStringPropertyWithDefault(regionName, null)).thenReturn("");
@@ -166,7 +190,7 @@ public class JDBCSecretCacheBuilderProviderTest {
     @Test
     public void test_settingValidation_emptyEnvironmentVariableIgnored() {
 
-        Config configProvider = mock(Config.class);
+        Config configProvider = mockConfig();
 
         String environmentRegionName = JDBCSecretCacheBuilderProvider.REGION_ENVIRONMENT_VARIABLE;
         environmentVariables.set(environmentRegionName, "");
@@ -181,7 +205,7 @@ public class JDBCSecretCacheBuilderProviderTest {
     @Test
     public void test_settingValidation_nullEnvironmentVariableIgnored() {
 
-        Config configProvider = mock(Config.class);
+        Config configProvider = mockConfig();
 
         String environmentRegionName = JDBCSecretCacheBuilderProvider.REGION_ENVIRONMENT_VARIABLE;
         environmentVariables.remove(environmentRegionName);
@@ -196,7 +220,7 @@ public class JDBCSecretCacheBuilderProviderTest {
     @Test
     public void test_settingValidation_emptyVpcIgnored() {
 
-        Config configProvider = mock(Config.class);
+        Config configProvider = mockConfig();
         String vpcEndpointUrlName = AWSSecretsManagerDriver.PROPERTY_PREFIX + "." + PROPERTY_VPC_ENDPOINT_URL;
         String vpcEndpointRegion = AWSSecretsManagerDriver.PROPERTY_PREFIX + "." + PROPERTY_VPC_ENDPOINT_REGION;
         when(configProvider.getStringPropertyWithDefault(vpcEndpointUrlName, null)).thenReturn("");
@@ -213,7 +237,7 @@ public class JDBCSecretCacheBuilderProviderTest {
     @Test
     public void test_settingValidation_nullVpcIgnored() {
 
-        Config configProvider = mock(Config.class);
+        Config configProvider = mockConfig();
         String vpcEndpointUrlName = AWSSecretsManagerDriver.PROPERTY_PREFIX + "." + PROPERTY_VPC_ENDPOINT_URL;
         String vpcEndpointRegion = AWSSecretsManagerDriver.PROPERTY_PREFIX + "." + PROPERTY_VPC_ENDPOINT_REGION;
         when(configProvider.getStringPropertyWithDefault(vpcEndpointUrlName, null)).thenReturn(null);
@@ -232,7 +256,7 @@ public class JDBCSecretCacheBuilderProviderTest {
      */
     @Test
     public void test_postQuantumTls_enabledViaConfig() {
-        Config configProvider = mock(Config.class);
+        Config configProvider = mockConfig();
         String pqtlsPropertyName = AWSSecretsManagerDriver.PROPERTY_PREFIX + "."
                 + JDBCSecretCacheBuilderProvider.PROPERTY_POST_QUANTUM_TLS_ENABLED;
         when(configProvider.getBooleanPropertyWithDefault(pqtlsPropertyName, false)).thenReturn(true);
@@ -246,7 +270,7 @@ public class JDBCSecretCacheBuilderProviderTest {
 
     @Test
     public void test_postQuantumTls_disabledByDefault() {
-        Config configProvider = mock(Config.class);
+        Config configProvider = mockConfig();
         String pqtlsPropertyName = AWSSecretsManagerDriver.PROPERTY_PREFIX + "."
                 + JDBCSecretCacheBuilderProvider.PROPERTY_POST_QUANTUM_TLS_ENABLED;
         when(configProvider.getBooleanPropertyWithDefault(pqtlsPropertyName, false)).thenReturn(false);
@@ -260,7 +284,7 @@ public class JDBCSecretCacheBuilderProviderTest {
 
     @Test
     public void test_postQuantumTls_withRegionConfig() {
-        Config configProvider = mock(Config.class);
+        Config configProvider = mockConfig();
         String regionName = AWSSecretsManagerDriver.PROPERTY_PREFIX + "."
                 + JDBCSecretCacheBuilderProvider.PROPERTY_REGION;
         String pqtlsPropertyName = AWSSecretsManagerDriver.PROPERTY_PREFIX + "."
@@ -278,7 +302,7 @@ public class JDBCSecretCacheBuilderProviderTest {
 
     @Test
     public void test_postQuantumTls_withVpcEndpoint() {
-        Config configProvider = mock(Config.class);
+        Config configProvider = mockConfig();
         String vpcEndpointUrlName = AWSSecretsManagerDriver.PROPERTY_PREFIX + "." + PROPERTY_VPC_ENDPOINT_URL;
         String vpcEndpointRegion = AWSSecretsManagerDriver.PROPERTY_PREFIX + "." + PROPERTY_VPC_ENDPOINT_REGION;
         String pqtlsPropertyName = AWSSecretsManagerDriver.PROPERTY_PREFIX + "."
@@ -295,5 +319,118 @@ public class JDBCSecretCacheBuilderProviderTest {
         assertEquals(vpcEndpointUrlString, client.serviceClientConfiguration().endpointOverride().get().toString());
         assertEquals(Region.AP_SOUTHEAST_3, client.serviceClientConfiguration().region());
         assertNotNull(client);
+    }
+
+    /**
+     * API call attempt timeout tests.
+     */
+    private static final String ATTEMPT_TIMEOUT_PROPERTY = AWSSecretsManagerDriver.PROPERTY_PREFIX + "."
+            + JDBCSecretCacheBuilderProvider.PROPERTY_API_CALL_ATTEMPT_TIMEOUT_MILLIS;
+
+    private static Config configWithRegion() {
+        Config configProvider = mockConfig();
+        when(configProvider.getStringPropertyWithDefault(AWSSecretsManagerDriver.PROPERTY_PREFIX + "."
+                + JDBCSecretCacheBuilderProvider.PROPERTY_REGION, null)).thenReturn("us-west-2");
+        return configProvider;
+    }
+
+    private static Optional<Duration> attemptTimeout(Config configProvider) {
+        SecretsManagerClient client = new JDBCSecretCacheBuilderProvider(configProvider).build().build();
+        return client.serviceClientConfiguration().overrideConfiguration().apiCallAttemptTimeout();
+    }
+
+    @Test
+    public void test_attemptTimeout_default() {
+        assertEquals(Optional.of(Duration.ofMillis(JDBCSecretCacheBuilderProvider.DEFAULT_API_CALL_ATTEMPT_TIMEOUT_MILLIS)),
+                attemptTimeout(configWithRegion()));
+    }
+
+    @Test
+    public void test_attemptTimeout_configFileProperty() {
+        Config configProvider = configWithRegion();
+        when(configProvider.getLongPropertyWithDefault(ATTEMPT_TIMEOUT_PROPERTY,
+                JDBCSecretCacheBuilderProvider.DEFAULT_API_CALL_ATTEMPT_TIMEOUT_MILLIS)).thenReturn(5000L);
+        assertEquals(Optional.of(Duration.ofMillis(5000)), attemptTimeout(configProvider));
+    }
+
+    @Test
+    public void test_attemptTimeout_zeroOrNegativeIsRejected() {
+        for (long value : new long[] {0, -1}) {
+            Config configProvider = configWithRegion();
+            when(configProvider.getLongPropertyWithDefault(ATTEMPT_TIMEOUT_PROPERTY,
+                    JDBCSecretCacheBuilderProvider.DEFAULT_API_CALL_ATTEMPT_TIMEOUT_MILLIS)).thenReturn(value);
+            assertThrows(PropertyException.class, () -> new JDBCSecretCacheBuilderProvider(configProvider).build());
+        }
+    }
+
+    /**
+     * Returns how long the driver's cache takes to time out against an endpoint
+     * that hangs, using the given number of attempts.
+     */
+    private long millisToTimeOutOnHungEndpoint(int maxAttempts, Long attemptTimeoutMillis) throws Exception {
+        // A socket that is never accepted completes the TCP handshake but never
+        // answers, like an endpoint that hangs after connecting.
+        try (ServerSocket hung = new ServerSocket(0, 50, InetAddress.getByName("127.0.0.1"))) {
+            environmentVariables.set("AWS_ACCESS_KEY_ID", "akid");
+            environmentVariables.set("AWS_SECRET_ACCESS_KEY", "secret");
+            environmentVariables.set("AWS_MAX_ATTEMPTS", String.valueOf(maxAttempts));
+
+            Config configProvider = configWithRegion();
+            when(configProvider.getStringPropertyWithDefault(AWSSecretsManagerDriver.PROPERTY_PREFIX + "."
+                    + PROPERTY_VPC_ENDPOINT_URL, null)).thenReturn("http://127.0.0.1:" + hung.getLocalPort());
+            when(configProvider.getStringPropertyWithDefault(AWSSecretsManagerDriver.PROPERTY_PREFIX + "."
+                    + PROPERTY_VPC_ENDPOINT_REGION, null)).thenReturn("us-west-2");
+            if (attemptTimeoutMillis != null) {
+                when(configProvider.getLongPropertyWithDefault(ATTEMPT_TIMEOUT_PROPERTY,
+                        JDBCSecretCacheBuilderProvider.DEFAULT_API_CALL_ATTEMPT_TIMEOUT_MILLIS)).thenReturn(attemptTimeoutMillis);
+            }
+
+            // Built the same way the driver builds its cache.
+            try (SecretCache cache = new SecretCache(new JDBCSecretCacheBuilderProvider(configProvider).build())) {
+                long start = System.nanoTime();
+                assertThrows(ApiCallAttemptTimeoutException.class, () -> cache.getSecretString("test"));
+                return Duration.ofNanos(System.nanoTime() - start).toMillis();
+            }
+        }
+    }
+
+    @Test
+    public void test_attemptTimeout_givesUpOnHungEndpoint() throws Exception {
+        long elapsedMillis = millisToTimeOutOnHungEndpoint(1, null);
+        assertTrue(elapsedMillis >= 2000 && elapsedMillis < 5000, "Took " + elapsedMillis + " ms to give up");
+    }
+
+    @Test
+    public void test_attemptTimeout_retriesTimedOutAttempt() throws Exception {
+        // Two 300 ms attempts set through the property, plus a short backoff between them.
+        long elapsedMillis = millisToTimeOutOnHungEndpoint(2, 300L);
+        assertTrue(elapsedMillis >= 600 && elapsedMillis < 3000, "Took " + elapsedMillis + " ms to give up");
+    }
+
+    @Test
+    public void test_attemptTimeout_sharesOneTimeoutExecutor() throws Exception {
+        // Each client would otherwise start its own SDK timer threads, which stay
+        // alive because closing the secret cache doesn't close its client.
+        assertSame(new JDBCSecretCacheBuilderProvider(configWithRegion()).build()
+                        .overrideConfiguration().scheduledExecutorService().get(),
+                new JDBCSecretCacheBuilderProvider(configWithRegion()).build()
+                        .overrideConfiguration().scheduledExecutorService().get());
+
+        long before = threadsNamed("sdk-ScheduledExecutor").size();
+        for (int i = 0; i < 3; i++) {
+            millisToTimeOutOnHungEndpoint(1, 300L);
+        }
+        assertEquals(before, threadsNamed("sdk-ScheduledExecutor").size());
+
+        List<Thread> driverThreads = threadsNamed("aws-secretsmanager-jdbc-timeout");
+        assertEquals(1, driverThreads.size());
+        assertTrue(driverThreads.get(0).isDaemon());
+        assertSame(JDBCSecretCacheBuilderProvider.class.getClassLoader(), driverThreads.get(0).getContextClassLoader());
+    }
+
+    private static List<Thread> threadsNamed(String prefix) {
+        return Thread.getAllStackTraces().keySet().stream()
+                .filter(t -> t.getName().startsWith(prefix))
+                .collect(Collectors.toList());
     }
 }
