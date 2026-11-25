@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
 import java.util.Properties;
 
@@ -357,7 +358,10 @@ public class AWSSecretsManagerDriverTest extends TestClass {
     public void test_getPropertyInfo_propagatesToRealDriver() {
         String param1 = "jdbc-secretsmanager:expectedUrl";
         Properties param2 = new Properties();
-        assertNotThrows(() -> Assertions.assertNull(sut.getPropertyInfo(param1, param2)));
+        DriverPropertyInfo[] result = Assertions.assertDoesNotThrow(() -> sut.getPropertyInfo(param1, param2));
+        assertEquals(2, result.length);
+        assertEquals(AWSSecretsManagerDriver.PROPERTY_AWS_PROFILE, result[0].name);
+        assertEquals(AWSSecretsManagerDriver.PROPERTY_AWS_REGION, result[1].name);
         assertEquals(1, DummyDriver.getPropertyInfoCallCount);
         String param1Expected = "jdbc:expectedUrl";
         assertEquals(param1Expected, DummyDriver.getPropertyInfoParam1);

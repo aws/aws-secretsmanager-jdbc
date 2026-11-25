@@ -86,12 +86,13 @@ public class DummyDriver implements Driver {
     public static int getPropertyInfoCallCount;
     public static String getPropertyInfoParam1;
     public static Properties getPropertyInfoParam2;
+    public static DriverPropertyInfo[] getPropertyInfoReturnValue;
     @Override
     public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) throws SQLException {
         getPropertyInfoCallCount++;
         getPropertyInfoParam1 = url;
         getPropertyInfoParam2 = info;
-        return null;
+        return getPropertyInfoReturnValue;
     }
 
     public static int jdbcCompliantCallCount;
@@ -109,8 +110,10 @@ public class DummyDriver implements Driver {
         getMinorVersionCallCount = 0;
         getParentLoggerCallCount = 0;
         jdbcCompliantCallCount = 0;
+        getPropertyInfoCallCount = 0;
         getPropertyInfoParam1 = null;
         getPropertyInfoParam2 = null;
+        getPropertyInfoReturnValue = null;
     }
 }
 
