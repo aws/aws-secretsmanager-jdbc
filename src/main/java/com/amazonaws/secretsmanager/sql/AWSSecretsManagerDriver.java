@@ -19,8 +19,13 @@ import java.sql.DriverManager;
 import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
@@ -28,11 +33,16 @@ import com.amazonaws.secretsmanager.caching.SecretCache;
 import com.amazonaws.secretsmanager.caching.SecretCacheConfiguration;
 import com.amazonaws.secretsmanager.util.Config;
 import com.amazonaws.secretsmanager.util.JDBCSecretCacheBuilderProvider;
+import com.amazonaws.secretsmanager.util.RegionResolver;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
+import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
+import software.amazon.awssdk.core.exception.SdkClientException;
+import software.amazon.awssdk.profiles.ProfileFile;
+import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClientBuilder;
 import software.amazon.awssdk.utils.StringUtils;
@@ -86,6 +96,13 @@ import software.amazon.awssdk.utils.StringUtils;
  *   <li>drivers.<i>subprefix</i>.realDriverClass - (optional) The class name of the driver to propagate calls to.
  *                                                  If not specified, default for <i>subprefix</i> is used</li>
  * </ul>
+ *
+ * <p>
+ * The connection properties <code>aws.profile</code> and <code>aws.region</code> select the AWS profile and region
+ * used to read secrets for that connection. They are never forwarded to the real driver. The region is taken from,
+ * in order: the secret ARN, <code>aws.region</code>, the profile's <code>region</code>, then the driver-wide
+ * defaults (<code>AWS_SECRET_JDBC_REGION</code>, <code>drivers.region</code>, the SDK default region chain).
+ * </p>
  */
 public abstract class AWSSecretsManagerDriver implements Driver {
 
@@ -109,11 +126,56 @@ public abstract class AWSSecretsManagerDriver implements Driver {
      */ 
     public static final String INVALID_SECRET_STRING_JSON = "Could not parse SecretString JSON";
 
+    /**
+     * Connection property naming the AWS profile used to read secrets.
+     */
+    public static final String PROPERTY_AWS_PROFILE = "aws.profile";
+
+    /**
+     * Connection property naming the AWS region used to read secrets.
+     */
+    public static final String PROPERTY_AWS_REGION = "aws.region";
+
     private static final Pattern INVALID_HOST_PATTERN = Pattern.compile(".*[?#&;/@\\\\\\s].*");
     private static final Pattern INVALID_DBNAME_PATTERN = Pattern.compile(".*[?#&;\\\\\\s].*");
     private static final Pattern DIGITS_ONLY_PATTERN = Pattern.compile("\\d+");
 
     private SecretCache secretCache;
+
+    /**
+     * Caches for connections using <code>aws.profile</code> / <code>aws.region</code>.
+     */
+    private final ConcurrentHashMap<SecretCacheKey, SecretCache> profileCaches = new ConcurrentHashMap<>();
+
+    /**
+     * Identifies a per-connection secret cache. Either field may be null (default credentials / default region).
+     */
+    private static final class SecretCacheKey {
+        private final String profile;
+        private final String region;
+
+        SecretCacheKey(String profile, String region) {
+            this.profile = profile;
+            this.region = region;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof SecretCacheKey)) {
+                return false;
+            }
+            SecretCacheKey other = (SecretCacheKey) o;
+            return Objects.equals(profile, other.profile) && Objects.equals(region, other.region);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(profile, region);
+        }
+    }
 
     private String realDriverClass;
 
@@ -210,6 +272,92 @@ public abstract class AWSSecretsManagerDriver implements Driver {
      */
     private static void shutdown(AWSSecretsManagerDriver driver) {
         driver.secretCache.close();
+        driver.profileCaches.values().forEach(SecretCache::close);
+    }
+
+    /**
+     * Returns the secret cache to use for a secret, given the connection's <code>aws.profile</code> and
+     * <code>aws.region</code> values. Without either value, the driver's default cache is returned.
+     *
+     * @param awsProfile                                        The AWS profile name, or null.
+     * @param awsRegion                                         The AWS region, or null.
+     * @param secretId                                          The secret name or ARN to read.
+     *
+     * @return SecretCache                                      The cache for the resolved profile and region.
+     *
+     * @throws SQLException                                     If the Secrets Manager client cannot be created.
+     */
+    private SecretCache resolveCache(String awsProfile, String awsRegion, String secretId) throws SQLException {
+        if (awsProfile == null && awsRegion == null) {
+            return this.secretCache;
+        }
+        String arnRegion = RegionResolver.regionFromArn(secretId);
+        String regionOverride = arnRegion != null ? arnRegion : awsRegion;
+        try {
+            return profileCaches.computeIfAbsent(new SecretCacheKey(awsProfile, regionOverride), key -> {
+                Region region = regionOverride != null
+                        ? Region.of(regionOverride)
+                        : RegionResolver.profileRegion(ProfileFile.defaultProfileFile(), awsProfile);
+                return createSecretCache(awsProfile, region);
+            });
+        } catch (SdkClientException e) {
+            throw new SQLException("Could not create the AWS Secrets Manager client for " + PROPERTY_AWS_PROFILE + "="
+                    + awsProfile + ", " + PROPERTY_AWS_REGION + "=" + awsRegion + ". Set " + PROPERTY_AWS_REGION
+                    + ", add a region to the profile, or use the secret ARN.", e);
+        }
+    }
+
+    /**
+     * Creates the secret cache for a profile and region.
+     *
+     * @param awsProfile                                        The AWS profile name, or null for default credentials.
+     * @param region                                            The region, or null for the driver-wide default region.
+     *
+     * @return SecretCache                                      A new secret cache.
+     */
+    protected SecretCache createSecretCache(String awsProfile, Region region) {
+        return new SecretCache(createClientBuilder(awsProfile, region).build());
+    }
+
+    /**
+     * Creates a client builder from the driver-wide configuration, overriding credentials and region.
+     *
+     * @param awsProfile                                        The AWS profile name, or null for default credentials.
+     * @param region                                            The region, or null for the driver-wide default region.
+     *
+     * @return SecretsManagerClientBuilder                      The configured client builder.
+     */
+    SecretsManagerClientBuilder createClientBuilder(String awsProfile, Region region) {
+        SecretsManagerClientBuilder builder = new JDBCSecretCacheBuilderProvider().build();
+        if (awsProfile != null) {
+            builder.credentialsProvider(ProfileCredentialsProvider.builder().profileName(awsProfile).build());
+        }
+        if (region != null) {
+            builder.region(region);
+        }
+        return builder;
+    }
+
+    /**
+     * Returns the properties without <code>aws.profile</code> and <code>aws.region</code>. The input is returned
+     * unchanged when it has neither property.
+     */
+    private static Properties withoutAwsProperties(Properties info) {
+        if (info == null
+                || (info.getProperty(PROPERTY_AWS_PROFILE) == null && info.getProperty(PROPERTY_AWS_REGION) == null)) {
+            return info;
+        }
+        Properties stripped = new Properties();
+        for (String name : info.stringPropertyNames()) {
+            if (!PROPERTY_AWS_PROFILE.equals(name) && !PROPERTY_AWS_REGION.equals(name)) {
+                stripped.setProperty(name, info.getProperty(name));
+            }
+        }
+        return stripped;
+    }
+
+    private static String trimmedProperty(Properties info, String name) {
+        return info == null ? null : StringUtils.trimToNull(info.getProperty(name));
     }
 
     /**
@@ -338,6 +486,7 @@ public abstract class AWSSecretsManagerDriver implements Driver {
      *                                                          credentials retrieved from Secrets Manager.
      * @param credentialsSecretId                               The friendly name or ARN of the secret that stores the
      *                                                          login credentials.
+     * @param cache                                             The secret cache to read the credentials from.
      *
      * @return Connection                                       A database connection.
      *
@@ -346,11 +495,11 @@ public abstract class AWSSecretsManagerDriver implements Driver {
      * @throws InterruptedException                             If there was an interruption during secret refresh.
      */
     @SuppressFBWarnings("THROWS_METHOD_THROWS_RUNTIMEEXCEPTION")
-    private Connection connectWithSecret(String unwrappedUrl, Properties info, String credentialsSecretId)
-            throws SQLException, InterruptedException {
+    private Connection connectWithSecret(String unwrappedUrl, Properties info, String credentialsSecretId,
+            SecretCache cache) throws SQLException, InterruptedException {
         int retryCount = 0;
         while (retryCount++ <= MAX_RETRY) {
-            String secretString = secretCache.getSecretString(credentialsSecretId);
+            String secretString = cache.getSecretString(credentialsSecretId);
             Properties updatedInfo = new Properties();
             for (String name : info.stringPropertyNames()) {
                 updatedInfo.setProperty(name, info.getProperty(name));
@@ -370,7 +519,7 @@ public abstract class AWSSecretsManagerDriver implements Driver {
                 return getWrappedDriver().connect(unwrappedUrl, updatedInfo);
             } catch (Exception e) {
                 if (isExceptionDueToAuthenticationError(e)) {
-                    boolean refreshSuccess = this.secretCache.refreshNow(credentialsSecretId);
+                    boolean refreshSuccess = cache.refreshNow(credentialsSecretId);
                     if (!refreshSuccess) {
                         throw(e);
                     }
@@ -412,12 +561,16 @@ public abstract class AWSSecretsManagerDriver implements Driver {
             return null;
         }
 
+        String awsProfile = trimmedProperty(info, PROPERTY_AWS_PROFILE);
+        String awsRegion = trimmedProperty(info, PROPERTY_AWS_REGION);
+        Properties forwardInfo = withoutAwsProperties(info);
+
         String unwrappedUrl = "";
         if (url.startsWith(SCHEME)) { // If this is a URL in the correct scheme, unwrap it
             unwrappedUrl = unwrapUrl(url);
         } else { // Else, assume this is a secret ID and try to retrieve it
             try {
-                String secretString = secretCache.getSecretString(url);
+                String secretString = resolveCache(awsProfile, awsRegion, url).getSecretString(url);
                 if (StringUtils.isBlank(secretString)) {
                     throw new IllegalArgumentException("URL " + url + " is not a valid URL starting with scheme " +
                             SCHEME + " or a valid retrievable secret ID ");
@@ -438,16 +591,17 @@ public abstract class AWSSecretsManagerDriver implements Driver {
             }
         }
 
-        if (info != null && info.getProperty("user") != null) {
-            String credentialsSecretId = info.getProperty("user");
+        if (forwardInfo != null && forwardInfo.getProperty("user") != null) {
+            String credentialsSecretId = forwardInfo.getProperty("user");
             try {
-                return connectWithSecret(unwrappedUrl, info, credentialsSecretId);
+                return connectWithSecret(unwrappedUrl, forwardInfo, credentialsSecretId,
+                        resolveCache(awsProfile, awsRegion, credentialsSecretId));
             } catch (InterruptedException e) {
                 // User driven exception. Throw a runtime exception.
                 throw new RuntimeException(e);
             }
         } else {
-            return getWrappedDriver().connect(unwrappedUrl, info);
+            return getWrappedDriver().connect(unwrappedUrl, forwardInfo);
         }
     }
 
@@ -468,7 +622,23 @@ public abstract class AWSSecretsManagerDriver implements Driver {
 
     @Override
     public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) throws SQLException {
-        return getWrappedDriver().getPropertyInfo(unwrapUrl(url), info);
+        DriverPropertyInfo[] wrappedProperties = getWrappedDriver().getPropertyInfo(unwrapUrl(url),
+                withoutAwsProperties(info));
+        List<DriverPropertyInfo> properties = new ArrayList<>();
+        if (wrappedProperties != null) {
+            properties.addAll(Arrays.asList(wrappedProperties));
+        }
+        properties.add(propertyInfo(info, PROPERTY_AWS_PROFILE,
+                "AWS profile used to read the secret (from the AWS config and credentials files)"));
+        properties.add(propertyInfo(info, PROPERTY_AWS_REGION,
+                "AWS region of the secret; overrides the profile region (a secret ARN's region takes precedence)"));
+        return properties.toArray(new DriverPropertyInfo[0]);
+    }
+
+    private static DriverPropertyInfo propertyInfo(Properties info, String name, String description) {
+        DriverPropertyInfo property = new DriverPropertyInfo(name, trimmedProperty(info, name));
+        property.description = description;
+        return property;
     }
 
     @Override

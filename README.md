@@ -128,4 +128,35 @@ For more information about Post-Quantum TLS in the AWS SDK, see the [AWS SDK for
 
 **NOTE**: PQ-TLS uses the AWS Common Runtime (CRT) which relies on system libraries and may not work as expected on macOS or Windows at this time ([ref](https://github.com/awslabs/aws-crt-java#tls-behavior)).
 
+### Per-connection AWS profile and region
+
+The options above apply to every connection made by the driver. To read secrets with a specific [AWS profile](https://docs.aws.amazon.com/sdkref/latest/guide/file-format.html) or region for a single connection, set these connection properties:
+
+| Property      | Description |
+|---------------|-------------|
+| `aws.profile` | Name of the profile in the AWS `config` / `credentials` files used to read the secret. |
+| `aws.region`  | Region of the secret. Overrides the profile region. |
+
+```java
+Properties info = new Properties();
+info.setProperty("user", "my-db-secret");
+info.setProperty("aws.profile", "my-profile");
+info.setProperty("aws.region", "us-east-2"); // optional
+Connection connection = DriverManager.getConnection("jdbc-secretsmanager:mysql://example.com:3306", info);
+```
+
+These properties are not passed to the underlying JDBC driver. When neither is set, the driver behaves as described above.
+
+All profile types supported by the AWS SDK for Java can be used: static keys, `credential_process` (for example, [Granted](https://docs.commonfate.io/granted)), assume role (`role_arn`), web identity and IAM Identity Center (SSO). The files are located with the standard `AWS_CONFIG_FILE` and `AWS_SHARED_CREDENTIALS_FILE` environment variables, defaulting to `~/.aws/config` and `~/.aws/credentials`.
+
+The region used to read the secret is the first one found in:
+
+1. The region in the secret ARN, when the secret is given as an ARN.
+2. The `aws.region` connection property.
+3. The `region` setting of the profile.
+4. The driver-wide region: `AWS_SECRET_JDBC_REGION` or `drivers.region` (see above).
+5. The [default region provider chain](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/region-selection.html) (`aws.region` system property, `AWS_REGION` environment variable, ...).
+
+**NOTE**: `credential_process` commands are run with the environment of the Java process. Make sure the command is on that process's `PATH`, or use an absolute path in the profile.
+
 If this driver is running on EKS, the library could pick up the credentials of the node it is running on instead of the service account role ([issue](https://github.com/aws/aws-secretsmanager-jdbc/issues/55)). To address this, add version `2` of `software.amazon.awssdk:sts` to your Gradle/Maven project file as a dependency.

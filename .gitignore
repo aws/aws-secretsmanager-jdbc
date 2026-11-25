@@ -23,3 +23,7 @@ jacoco.exec
 
 # VS Code
 .vscode/
+
+# Local connection test (cli-test/)
+cli-test/lib/
+cli-test/connections.csv
